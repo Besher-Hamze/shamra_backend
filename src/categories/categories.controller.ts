@@ -1,0 +1,179 @@
+import {
+    Controller,
+    Get,
+    Post,
+    Body,
+    Patch,
+    Param,
+    Delete,
+    Query,
+    UseGuards,
+    Request,
+    HttpCode,
+    HttpStatus,
+} from '@nestjs/common';
+import { CategoriesService } from './categories.service';
+import {
+    CreateCategoryDto,
+    UpdateCategoryDto,
+    CategoryQueryDto,
+    UpdateSortOrderDto,
+} from './dto';
+import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
+import { UserRole } from 'src/common/enums';
+import { Roles } from 'src/auth/decorators/role.decorator';
+
+@Controller('categories')
+export class CategoriesController {
+    constructor(private readonly categoriesService: CategoriesService) { }
+
+    @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async create(
+        @Body() createCategoryDto: CreateCategoryDto,
+        @Request() req,
+    ) {
+        const category = await this.categoriesService.create(
+            createCategoryDto,
+            req.user.sub,
+        );
+        return {
+            success: true,
+            message: 'تم إنشاء التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Get()
+    async findAll(@Query() query: CategoryQueryDto) {
+        const result = await this.categoriesService.findAll(query);
+        return {
+            success: true,
+            message: 'تم جلب التصنيفات بنجاح',
+            data: result.data,
+            pagination: result.pagination,
+        };
+    }
+
+    @Get('tree')
+    async getCategoryTree() {
+        const tree = await this.categoriesService.getCategoryTree();
+        return {
+            success: true,
+            message: 'تم جلب شجرة التصنيفات بنجاح',
+            data: tree,
+        };
+    }
+
+    @Get('stats')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async getCategoryStats() {
+        const stats = await this.categoriesService.getCategoryStats();
+        return {
+            success: true,
+            message: 'تم جلب إحصائيات التصنيفات بنجاح',
+            data: stats,
+        };
+    }
+
+    @Get('slug/:slug')
+    async findBySlug(
+        @Param('slug') slug: string,
+        @Query('withChildren') withChildren?: string,
+    ) {
+        const category = await this.categoriesService.findBySlug(
+            slug,
+            withChildren === 'true',
+        );
+        return {
+            success: true,
+            message: 'تم جلب التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Get(':id')
+    async findOne(
+        @Param('id') id: string,
+        @Query('withChildren') withChildren?: string,
+    ) {
+        const category = await this.categoriesService.findById(
+            id,
+            withChildren === 'true',
+        );
+        return {
+            success: true,
+            message: 'تم جلب التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Patch(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async update(
+        @Param('id') id: string,
+        @Body() updateCategoryDto: UpdateCategoryDto,
+        @Request() req,
+    ) {
+        const category = await this.categoriesService.update(
+            id,
+            updateCategoryDto,
+            req.user.sub,
+        );
+        return {
+            success: true,
+            message: 'تم تحديث التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Patch(':id/toggle-active')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async toggleActive(@Param('id') id: string, @Request() req) {
+        const category = await this.categoriesService.toggleActive(
+            id,
+            req.user.sub,
+        );
+        return {
+            success: true,
+            message: 'تم تحديث حالة التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Patch(':id/sort-order')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async updateSortOrder(
+        @Param('id') id: string,
+        @Body() updateSortOrderDto: UpdateSortOrderDto,
+        @Request() req,
+    ) {
+        const category = await this.categoriesService.updateSortOrder(
+            id,
+            updateSortOrderDto.sortOrder,
+            req.user.sub,
+        );
+        return {
+            success: true,
+            message: 'تم تحديث ترتيب التصنيف بنجاح',
+            data: category,
+        };
+    }
+
+    @Delete(':id')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN)
+    @HttpCode(HttpStatus.OK)
+    async remove(@Param('id') id: string, @Request() req) {
+        await this.categoriesService.remove(id, req.user.sub);
+        return {
+            success: true,
+            message: 'تم حذف التصنيف بنجاح',
+        };
+    }
+}
