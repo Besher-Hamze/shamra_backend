@@ -14,6 +14,18 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
+export class CoordinatesDto {
+    @IsNumber()
+    @Min(-90)
+    @Type(() => Number)
+    lat: number;
+
+    @IsNumber()
+    @Min(-180)
+    @Type(() => Number)
+    lng: number;
+}
+
 // Address DTO
 export class AddressDto {
     @IsString()
@@ -48,17 +60,6 @@ export class AddressDto {
 }
 
 // Coordinates DTO
-export class CoordinatesDto {
-    @IsNumber()
-    @Min(-90)
-    @Type(() => Number)
-    lat: number;
-
-    @IsNumber()
-    @Min(-180)
-    @Type(() => Number)
-    lng: number;
-}
 
 // Operating Hours DTO
 export class DayHoursDto {

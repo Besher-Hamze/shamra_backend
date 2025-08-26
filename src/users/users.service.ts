@@ -111,10 +111,12 @@ export class UsersService {
 
     // Find user by email (for authentication)
     async findByEmail(email: string): Promise<User | null> {
-        return await this.userModel
+        const user = await this.userModel
             .findOne({ email, isDeleted: { $ne: true } })
             .select('+password')
-            .exec();
+            .lean()
+            .exec() as any;
+        return user;
     }
 
     // Update user

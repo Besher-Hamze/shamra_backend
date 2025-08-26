@@ -1,47 +1,48 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
+import { CategoriesModule } from './categories/categories.module';
 import { BranchesModule } from './branches/branches.module';
 import { CustomersModule } from './customers/customers.module';
 import { OrdersModule } from './orders/orders.module';
-
+import { NotificationsModule } from './notifications/notifications.module';
+import { InventoryModule } from './inventory/inventory.module';
+import { ReportsModule } from './reports/reports.module';
+import { SeedsModule } from './seeds/seeds.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   imports: [
-    // Configuration
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.local', '.env'],
     }),
-
-    // Database
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI') || 'mongodb://localhost:27017/shamra_db',
-      }),
-      inject: [ConfigService],
-    }),
-
-    // Rate limiting
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 100,
-    }]),
-
-    // Feature modules
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/shamra'),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     AuthModule,
     UsersModule,
-    CategoriesModule,
     ProductsModule,
+    CategoriesModule,
     BranchesModule,
     CustomersModule,
-    OrdersModule
+    OrdersModule,
+    NotificationsModule,
+    InventoryModule,
+    ReportsModule,
+    SettingsModule,
+    SeedsModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule { }
