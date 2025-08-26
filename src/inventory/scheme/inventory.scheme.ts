@@ -191,7 +191,7 @@ InventorySchema.index({ currentStock: 1 });
 InventorySchema.index({ lastRestockedAt: -1 });
 
 // Indexes for InventoryTransaction
-InventoryTransactionSchema.index({ transactionNumber: 1 }, { unique: true });
+// transactionNumber index is already created by @Prop({ unique: true })
 InventoryTransactionSchema.index({ productId: 1 });
 InventoryTransactionSchema.index({ type: 1 });
 InventoryTransactionSchema.index({ branchId: 1 });

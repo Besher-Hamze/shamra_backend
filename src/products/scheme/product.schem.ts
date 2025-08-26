@@ -135,8 +135,7 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 // Indexes
 ProductSchema.index({ name: 1 });
 ProductSchema.index({ nameAr: 1 });
-ProductSchema.index({ sku: 1 }, { unique: true });
-ProductSchema.index({ slug: 1 }, { unique: true });
+// sku and slug indexes are already created by @Prop({ unique: true })
 ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ brand: 1 });

@@ -61,7 +61,7 @@ export const CategorySchema = SchemaFactory.createForClass(Category);
 // Indexes
 CategorySchema.index({ name: 1 });
 CategorySchema.index({ nameAr: 1 });
-CategorySchema.index({ slug: 1 }, { unique: true });
+// slug index is already created by @Prop({ unique: true })
 CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ isActive: 1 });
 CategorySchema.index({ sortOrder: 1 });

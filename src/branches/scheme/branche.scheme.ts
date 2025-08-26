@@ -116,7 +116,7 @@ export const BranchSchema = SchemaFactory.createForClass(Branch);
 // Indexes
 BranchSchema.index({ name: 1 });
 BranchSchema.index({ nameAr: 1 });
-BranchSchema.index({ code: 1 }, { unique: true });
+// code index is already created by @Prop({ unique: true })
 BranchSchema.index({ isActive: 1 });
 BranchSchema.index({ isMainBranch: 1 });
 BranchSchema.index({ managerId: 1 });

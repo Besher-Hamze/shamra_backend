@@ -63,8 +63,7 @@ export class Customer {
 export const CustomerSchema = SchemaFactory.createForClass(Customer);
 
 // Indexes
-CustomerSchema.index({ email: 1 }, { unique: true });
-CustomerSchema.index({ customerCode: 1 }, { unique: true });
+// email and customerCode indexes are already created by @Prop({ unique: true })
 CustomerSchema.index({ phoneNumber: 1 });
 CustomerSchema.index({ firstName: 1, lastName: 1 });
 CustomerSchema.index({ isActive: 1 });

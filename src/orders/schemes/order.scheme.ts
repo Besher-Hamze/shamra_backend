@@ -79,7 +79,7 @@ export class Order {
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 // Indexes
-OrderSchema.index({ orderNumber: 1 }, { unique: true });
+// orderNumber index is already created by @Prop({ unique: true })
 OrderSchema.index({ customerId: 1 });
 OrderSchema.index({ branchId: 1 });
 OrderSchema.index({ status: 1 });

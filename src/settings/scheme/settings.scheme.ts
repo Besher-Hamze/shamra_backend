@@ -42,7 +42,7 @@ export class Settings {
 export const SettingsSchema = SchemaFactory.createForClass(Settings);
 
 // Indexes
-SettingsSchema.index({ key: 1 }, { unique: true });
+// key index is already created by @Prop({ unique: true })
 SettingsSchema.index({ category: 1 });
 SettingsSchema.index({ isPublic: 1 });
 SettingsSchema.index({ isDeleted: 1 });
