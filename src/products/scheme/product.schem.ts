@@ -48,6 +48,9 @@ export class Product {
     @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
     categoryId: Types.ObjectId;
 
+    @Prop({ type: Types.ObjectId, ref: 'SubCategory', required: true })
+    subCategoryId: Types.ObjectId;
+
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Category' }], default: [] })
     additionalCategories: Types.ObjectId[];
 
@@ -59,6 +62,9 @@ export class Product {
 
     @Prop({ trim: true })
     brand: string;
+
+    @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
+    branchId: Types.ObjectId;
 
     @Prop({ trim: true })
     model: string;
@@ -138,6 +144,7 @@ ProductSchema.index({ nameAr: 1 });
 // sku and slug indexes are already created by @Prop({ unique: true })
 ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ categoryId: 1 });
+ProductSchema.index({ subCategoryId: 1 });
 ProductSchema.index({ brand: 1 });
 ProductSchema.index({ status: 1 });
 ProductSchema.index({ isActive: 1 });
@@ -152,10 +159,10 @@ ProductSchema.index({ createdAt: -1 });
 ProductSchema.index({ isDeleted: 1 });
 
 // Compound indexes
-ProductSchema.index({ categoryId: 1, isActive: 1, isDeleted: 1 });
+ProductSchema.index({ categoryId: 1, subCategoryId: 1, isActive: 1, isDeleted: 1 });
 ProductSchema.index({ isActive: 1, isFeatured: 1, isDeleted: 1 });
-ProductSchema.index({ price: 1, categoryId: 1 });
-ProductSchema.index({ brand: 1, categoryId: 1 });
+ProductSchema.index({ price: 1, categoryId: 1, subCategoryId: 1 });
+ProductSchema.index({ brand: 1, categoryId: 1, subCategoryId: 1 });
 
 // Text index for search
 ProductSchema.index({

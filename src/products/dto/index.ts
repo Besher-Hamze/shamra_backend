@@ -102,6 +102,13 @@ export class CreateProductDto {
     @IsMongoId()
     categoryId: string;
 
+    @IsMongoId()
+    branchId: string;
+
+    @IsOptional()
+    @IsMongoId()
+    subCategoryId?: string;
+
     @IsOptional()
     @IsArray()
     @IsMongoId({ each: true })
@@ -224,6 +231,10 @@ export class UpdateProductDto {
     price?: number;
 
     @IsOptional()
+    @IsMongoId()
+    branchId?: string;
+
+    @IsOptional()
     @IsNumber()
     @Min(0)
     costPrice?: number;
@@ -251,6 +262,10 @@ export class UpdateProductDto {
     @IsOptional()
     @IsMongoId()
     categoryId?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    subCategoryId?: string;
 
     @IsOptional()
     @IsArray()
@@ -349,6 +364,10 @@ export class ProductQueryDto {
     @IsOptional()
     @IsMongoId()
     categoryId?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    subCategoryId?: string;
 
     @IsOptional()
     @IsString()

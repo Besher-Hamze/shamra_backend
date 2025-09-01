@@ -16,6 +16,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { ReportsModule } from './reports/reports.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { SettingsModule } from './settings/settings.module';
+import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { SettingsModule } from './settings/settings.module';
     InventoryModule,
     ReportsModule,
     SettingsModule,
+    SubCategoriesModule,
     SeedsModule,
   ],
   controllers: [AppController],

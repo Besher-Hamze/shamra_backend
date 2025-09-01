@@ -3,12 +3,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Product, ProductDocument } from '../products/scheme/product.schem';
 import { Category, CategoryDocument } from '../categories/scheme/category.scheme';
+import { SubCategory, SubCategoryDocument } from '../sub-categories/scheme/sub-category.scheme';
 
 @Injectable()
 export class ProductsSeedService {
     constructor(
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
         @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
+        @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategoryDocument>,
     ) { }
 
     async seed() {
@@ -29,6 +31,13 @@ export class ProductsSeedService {
                 return;
             }
 
+            // Get sub-categories for reference
+            const subCategories = await this.subCategoryModel.find();
+            if (subCategories.length === 0) {
+                console.log('⚠️  No sub-categories found. Please seed sub-categories first.');
+                return;
+            }
+
             const products = [
                 // Smartphones
                 {
@@ -39,6 +48,7 @@ export class ProductsSeedService {
                     price: 8500000,
                     costPrice: 7000000,
                     categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'iPhone')?._id,
                     brand: 'Apple',
                     model: 'iPhone 15 Pro',
                     stockQuantity: 25,
@@ -64,6 +74,7 @@ export class ProductsSeedService {
                     price: 7500000,
                     costPrice: 6000000,
                     categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'Samsung')?._id,
                     brand: 'Samsung',
                     model: 'Galaxy S24 Ultra',
                     stockQuantity: 30,
@@ -90,6 +101,7 @@ export class ProductsSeedService {
                     price: 15000000,
                     costPrice: 12000000,
                     categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'MacBooks')?._id,
                     brand: 'Apple',
                     model: 'MacBook Pro 16" M3 Pro',
                     stockQuantity: 15,
@@ -115,6 +127,7 @@ export class ProductsSeedService {
                     price: 12000000,
                     costPrice: 9500000,
                     categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'Windows Laptops')?._id,
                     brand: 'Dell',
                     model: 'XPS 15',
                     stockQuantity: 20,
@@ -141,6 +154,7 @@ export class ProductsSeedService {
                     price: 2800000,
                     costPrice: 2200000,
                     categoryId: categories.find(c => c.name === 'Audio & Speakers')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'PlayStation')?._id,
                     brand: 'Sony',
                     model: 'WH-1000XM5',
                     stockQuantity: 40,
@@ -167,6 +181,7 @@ export class ProductsSeedService {
                     price: 4500000,
                     costPrice: 3500000,
                     categoryId: categories.find(c => c.name === 'Gaming')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'PlayStation')?._id,
                     brand: 'Sony',
                     model: 'PlayStation 5',
                     stockQuantity: 35,
@@ -193,6 +208,7 @@ export class ProductsSeedService {
                     price: 8500000,
                     costPrice: 6800000,
                     categoryId: categories.find(c => c.name === 'Cameras & Photography')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'Canon')?._id,
                     brand: 'Canon',
                     model: 'EOS R6 Mark II',
                     stockQuantity: 18,
@@ -219,6 +235,7 @@ export class ProductsSeedService {
                     price: 12000000,
                     costPrice: 9500000,
                     categoryId: categories.find(c => c.name === 'Home Appliances')?._id,
+                    subCategoryId: subCategories.find(sc => sc.name === 'LG')?._id,
                     brand: 'LG',
                     model: 'OLED65C3',
                     stockQuantity: 12,

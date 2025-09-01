@@ -4,12 +4,16 @@ import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
 import { Product, ProductSchema } from './scheme/product.schem';
 import { Category, CategorySchema } from 'src/categories/scheme/category.scheme';
+import { SubCategory, SubCategorySchema } from 'src/sub-categories/scheme/sub-category.scheme';
+import { Branch, BranchSchema } from 'src/branches/scheme/branche.scheme';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Product.name, schema: ProductSchema },
       { name: Category.name, schema: CategorySchema },
+      { name: SubCategory.name, schema: SubCategorySchema },
+      { name: Branch.name, schema: BranchSchema },
     ]),
   ],
   controllers: [ProductsController],

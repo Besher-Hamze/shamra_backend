@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 
 export type SettingsDocument = Settings & Document;
 
@@ -8,8 +8,8 @@ export class Settings {
     @Prop({ required: true, unique: true })
     key: string;
 
-    @Prop({ required: true })
-    value: string;
+    @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
+    value: any;
 
     @Prop({ trim: true })
     description: string;

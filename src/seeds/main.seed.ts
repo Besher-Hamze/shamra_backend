@@ -3,6 +3,7 @@ import { UsersSeedService } from './users.seed';
 import { CategoriesSeedService } from './categories.seed';
 import { ProductsSeedService } from './products.seed';
 import { SettingsSeedService } from './settings.seed';
+import { SubCategoriesSeedService } from './sub-categories.seed';
 
 @Injectable()
 export class MainSeedService implements OnModuleInit {
@@ -11,6 +12,7 @@ export class MainSeedService implements OnModuleInit {
         private readonly categoriesSeedService: CategoriesSeedService,
         private readonly productsSeedService: ProductsSeedService,
         private readonly settingsSeedService: SettingsSeedService,
+        private readonly subCategoriesSeedService: SubCategoriesSeedService,
     ) { }
 
     async onModuleInit() {
@@ -27,6 +29,7 @@ export class MainSeedService implements OnModuleInit {
                 settings: null,
                 users: null,
                 categories: null,
+                subCategories: null,
                 products: null,
             };
 
@@ -42,8 +45,12 @@ export class MainSeedService implements OnModuleInit {
             console.log('\n🏷️  Step 3: Seeding Product Categories');
             results.categories = await this.categoriesSeedService.seed();
 
-            // 4. Seed Products (depends on categories)
-            console.log('\n📱 Step 4: Seeding Products');
+            // 4. Seed Sub-Categories (depends on categories)
+            console.log('\n🔗 Step 4: Seeding Sub-Categories');
+            results.subCategories = await this.subCategoriesSeedService.seed();
+
+            // 5. Seed Products (depends on categories and sub-categories)
+            console.log('\n📱 Step 5: Seeding Products');
             results.products = await this.productsSeedService.seed();
 
             console.log('\n==========================================');
@@ -53,6 +60,7 @@ export class MainSeedService implements OnModuleInit {
             console.log(`   ⚙️  Settings: ${results.settings ? 'Created' : 'Skipped'}`);
             console.log(`   👥 Users: ${results.users ? 'Created' : 'Skipped'}`);
             console.log(`   🏷️  Categories: ${results.categories ? 'Created' : 'Skipped'}`);
+            console.log(`   🔗 Sub-Categories: ${results.subCategories ? 'Created' : 'Skipped'}`);
             console.log(`   📱 Products: ${results.products ? 'Created' : 'Skipped'}`);
 
             if (results.users) {
@@ -79,13 +87,16 @@ export class MainSeedService implements OnModuleInit {
             console.log('\n📱 Step 1: Clearing Products');
             await this.productsSeedService.clear();
 
-            console.log('\n🏷️  Step 2: Clearing Categories');
+            console.log('\n🔗 Step 2: Clearing Sub-Categories');
+            await this.subCategoriesSeedService.clear();
+
+            console.log('\n🏷️  Step 3: Clearing Categories');
             await this.categoriesSeedService.clear();
 
-            console.log('\n👥 Step 3: Clearing Users');
+            console.log('\n👥 Step 4: Clearing Users');
             await this.usersSeedService.clear();
 
-            console.log('\n⚙️  Step 4: Clearing Settings');
+            console.log('\n⚙️  Step 5: Clearing Settings');
             await this.settingsSeedService.clear();
 
             console.log('\n==========================================');
