@@ -5,6 +5,7 @@ export type BranchDocument = Branch & Document;
 
 @Schema({ timestamps: true })
 export class Branch {
+    _id: Types.ObjectId;
     @Prop({ required: true, trim: true })
     name: string;
 

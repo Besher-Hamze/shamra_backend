@@ -36,6 +36,7 @@ export interface JwtPayload {
     email: string;
     role: string;
     branchId?: string;
+    selectedBranchId?: string;
     iat?: number;
     exp?: number;
 }

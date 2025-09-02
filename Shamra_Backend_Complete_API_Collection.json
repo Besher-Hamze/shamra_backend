@@ -1,0 +1,2687 @@
+{
+  "info": {
+    "name": "Shamra Electronics Backend API",
+    "description": "Complete API collection for Shamra Electronics Backend System",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@shamra.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"your_refresh_token_here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Jane\",\n  \"lastName\": \"Smith\",\n  \"email\": \"jane@shamra.com\",\n  \"password\": \"123456\",\n  \"role\": \"employee\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated Name\",\n  \"phoneNumber\": \"+963123456789\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"oldPassword\": \"123456\",\n  \"newPassword\": \"newpassword123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/change-password",
+              "host": ["{{base_url}}"],
+              "path": ["users", "change-password"]
+            }
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated Name\",\n  \"role\": \"manager\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle User Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id/toggle-active",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id", "toggle-active"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/:id",
+              "host": ["{{base_url}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "user_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products?page=1&limit=20&sort=-createdAt",
+              "host": ["{{base_url}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sort",
+                  "value": "-createdAt"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Product",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone 15 Pro\",\n  \"nameAr\": \"آيفون 15 برو\",\n  \"description\": \"Latest iPhone with A17 Pro chip\",\n  \"descriptionAr\": \"أحدث آيفون مع معالج A17 برو\",\n  \"sku\": \"IP15PRO128\",\n  \"price\": 1200,\n  \"costPrice\": 900,\n  \"categoryId\": \"category_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"stockQuantity\": 50,\n  \"brand\": \"Apple\",\n  \"model\": \"iPhone 15 Pro\",\n  \"isActive\": true,\n  \"isFeatured\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products",
+              "host": ["{{base_url}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Get Featured Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/featured?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["products", "featured"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get On Sale Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/on-sale?limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["products", "on-sale"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Low Stock Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/low-stock?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["products", "low-stock"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/stats",
+              "host": ["{{base_url}}"],
+              "path": ["products", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Product by SKU",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/sku/:sku",
+              "host": ["{{base_url}}"],
+              "path": ["products", "sku", ":sku"],
+              "variable": [
+                {
+                  "key": "sku",
+                  "value": "IP15PRO128"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/slug/:slug",
+              "host": ["{{base_url}}"],
+              "path": ["products", "slug", ":slug"],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "iphone-15-pro"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Product Name\",\n  \"price\": 1300,\n  \"stockQuantity\": 45\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product Stock",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stockQuantity\": 100,\n  \"reason\": \"New shipment received\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/:id/stock",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id", "stock"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Product Price",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1100,\n  \"salePrice\": 999,\n  \"isOnSale\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/products/:id/price",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id", "price"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Product Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id/toggle-active",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id", "toggle-active"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Product Featured",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id/toggle-featured",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id", "toggle-featured"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/products/:id",
+              "host": ["{{base_url}}"],
+              "path": ["products", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "product_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Smartphones\",\n  \"nameAr\": \"الهواتف الذكية\",\n  \"description\": \"Mobile phones and smartphones\",\n  \"descriptionAr\": \"الهواتف المحمولة والهواتف الذكية\",\n  \"slug\": \"smartphones\",\n  \"isActive\": true,\n  \"sortOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories",
+              "host": ["{{base_url}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category Tree",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/tree",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "tree"]
+            }
+          }
+        },
+        {
+          "name": "Get Category Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/stats",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by Slug",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/slug/:slug?withChildren=true",
+              "host": ["{{base_url}}"],
+              "path": ["categories", "slug", ":slug"],
+              "query": [
+                {
+                  "key": "withChildren",
+                  "value": "true"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "smartphones"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id?withChildren=true",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "query": [
+                {
+                  "key": "withChildren",
+                  "value": "true"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Category Name\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Category Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id/toggle-active",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id", "toggle-active"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Category Sort Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sortOrder\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categories/:id/sort-order",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id", "sort-order"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sub-Categories",
+      "item": [
+        {
+          "name": "Get All Sub-Categories",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sub-categories?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Sub-Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"iPhone\",\n  \"nameAr\": \"آيفون\",\n  \"description\": \"Apple iPhone series\",\n  \"descriptionAr\": \"سلسلة آيفون من آبل\",\n  \"categoryId\": \"category_id_here\",\n  \"slug\": \"iphone\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sub-categories",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Sub-Categories by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sub-categories/category/:categoryId",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories", "category", ":categoryId"],
+              "variable": [
+                {
+                  "key": "categoryId",
+                  "value": "category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Sub-Category by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sub-categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "sub_category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Sub-Category",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Sub-Category Name\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/sub-categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "sub_category_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Sub-Category",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/sub-categories/:id",
+              "host": ["{{base_url}}"],
+              "path": ["sub-categories", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "sub_category_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Branches",
+      "item": [
+        {
+          "name": "Get All Branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["branches"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Branch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Damascus Main Branch\",\n  \"nameAr\": \"فرع دمشق الرئيسي\",\n  \"code\": \"DMS001\",\n  \"address\": \"Damascus, Syria\",\n  \"phoneNumber\": \"+963112345678\",\n  \"email\": \"damascus@shamra.com\",\n  \"isActive\": true,\n  \"isMainBranch\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/branches",
+              "host": ["{{base_url}}"],
+              "path": ["branches"]
+            }
+          }
+        },
+        {
+          "name": "Get Active Branches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/active",
+              "host": ["{{base_url}}"],
+              "path": ["branches", "active"]
+            }
+          }
+        },
+        {
+          "name": "Get Main Branch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/main",
+              "host": ["{{base_url}}"],
+              "path": ["branches", "main"]
+            }
+          }
+        },
+        {
+          "name": "Get Branch Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/stats",
+              "host": ["{{base_url}}"],
+              "path": ["branches", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Branch by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/code/:code",
+              "host": ["{{base_url}}"],
+              "path": ["branches", "code", ":code"],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "DMS001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Branch by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/:id",
+              "host": ["{{base_url}}"],
+              "path": ["branches", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Branch",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Branch Name\",\n  \"phoneNumber\": \"+963112345679\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/branches/:id",
+              "host": ["{{base_url}}"],
+              "path": ["branches", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Branch Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/:id/toggle-active",
+              "host": ["{{base_url}}"],
+              "path": ["branches", ":id", "toggle-active"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Branch Sort Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sortOrder\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/branches/:id/sort-order",
+              "host": ["{{base_url}}"],
+              "path": ["branches", ":id", "sort-order"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Branch",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/branches/:id",
+              "host": ["{{base_url}}"],
+              "path": ["branches", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customers",
+      "item": [
+        {
+          "name": "Get All Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["customers"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Customer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Ahmad\",\n  \"lastName\": \"Hassan\",\n  \"email\": \"ahmad@example.com\",\n  \"phoneNumber\": \"+963987654321\",\n  \"customerCode\": \"CUST001\",\n  \"address\": {\n    \"street\": \"Main Street 123\",\n    \"city\": \"Damascus\",\n    \"country\": \"Syria\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers",
+              "host": ["{{base_url}}"],
+              "path": ["customers"]
+            }
+          }
+        },
+        {
+          "name": "Get Top Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/top-customers?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "top-customers"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Customers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/recent?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/stats",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/email/:email",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "email", ":email"],
+              "variable": [
+                {
+                  "key": "email",
+                  "value": "ahmad@example.com"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/code/:customerCode",
+              "host": ["{{base_url}}"],
+              "path": ["customers", "code", ":customerCode"],
+              "variable": [
+                {
+                  "key": "customerCode",
+                  "value": "CUST001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/:id",
+              "host": ["{{base_url}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Customer",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Updated Name\",\n  \"phoneNumber\": \"+963987654322\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customers/:id",
+              "host": ["{{base_url}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Toggle Customer Active",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/:id/toggle-active",
+              "host": ["{{base_url}}"],
+              "path": ["customers", ":id", "toggle-active"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Customer",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/customers/:id",
+              "host": ["{{base_url}}"],
+              "path": ["customers", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "customer_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?page=1&limit=20&status=pending",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "status",
+                  "value": "pending"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"customer_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"items\": [\n    {\n      \"productId\": \"product_id_here\",\n      \"productName\": \"iPhone 15 Pro\",\n      \"productSku\": \"IP15PRO128\",\n      \"quantity\": 2,\n      \"price\": 1200\n    }\n  ],\n  \"taxAmount\": 240,\n  \"discountAmount\": 50,\n  \"notes\": \"Customer requested fast delivery\",\n  \"isPaid\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/recent?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "recent"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/stats",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Order by Number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/number/:orderNumber",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "number", ":orderNumber"],
+              "variable": [
+                {
+                  "key": "orderNumber",
+                  "value": "ORD-2024-001"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Order by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"confirmed\",\n  \"notes\": \"Order confirmed and ready for processing\",\n  \"isPaid\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipped\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/:id/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id", "status"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/:id",
+              "host": ["{{base_url}}"],
+              "path": ["orders", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "order_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "Get All Inventory",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory?page=1&limit=20&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["inventory"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Inventory",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"quantity\": 100,\n  \"minStockLevel\": 10,\n  \"maxStockLevel\": 500\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory",
+              "host": ["{{base_url}}"],
+              "path": ["inventory"]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/stats?branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "stats"],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Low Stock Items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/low-stock?branchId=branch_id_here&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "low-stock"],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Transactions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/transactions?page=1&limit=20&type=sale",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "transactions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "type",
+                  "value": "sale"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Stock Movement",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/stock-movement/:productId/:branchId?days=30",
+              "host": ["{{base_url}}"],
+              "path": [
+                "inventory",
+                "stock-movement",
+                ":productId",
+                ":branchId"
+              ],
+              "query": [
+                {
+                  "key": "days",
+                  "value": "30"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "product_id_here"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/:id",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inventory_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory by Product and Branch",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/product/:productId/branch/:branchId",
+              "host": ["{{base_url}}"],
+              "path": [
+                "inventory",
+                "product",
+                ":productId",
+                "branch",
+                ":branchId"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "product_id_here"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Inventory",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 150,\n  \"minStockLevel\": 15\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory/:id",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inventory_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Adjust Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"quantity\": 25,\n  \"type\": \"adjustment\",\n  \"reason\": \"Stock count correction\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory/adjust-stock",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "adjust-stock"]
+            }
+          }
+        },
+        {
+          "name": "Transfer Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_id_here\",\n  \"fromBranchId\": \"branch_id_1\",\n  \"toBranchId\": \"branch_id_2\",\n  \"quantity\": 10,\n  \"reason\": \"Branch restocking\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory/transfer-stock",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "transfer-stock"]
+            }
+          }
+        },
+        {
+          "name": "Reserve Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"quantity\": 5\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory/reserve-stock",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "reserve-stock"]
+            }
+          }
+        },
+        {
+          "name": "Release Reserved Stock",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productId\": \"product_id_here\",\n  \"branchId\": \"branch_id_here\",\n  \"quantity\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/inventory/release-reserved-stock",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", "release-reserved-stock"]
+            }
+          }
+        },
+        {
+          "name": "Delete Inventory",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/inventory/:id",
+              "host": ["{{base_url}}"],
+              "path": ["inventory", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "inventory_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Low Stock Alert\",\n  \"titleAr\": \"تنبيه نقص المخزون\",\n  \"message\": \"Product XYZ is running low on stock\",\n  \"messageAr\": \"المنتج XYZ ينخفض مخزونه\",\n  \"type\": \"low_stock\",\n  \"recipientId\": \"user_id_here\",\n  \"metadata\": {\n    \"productId\": \"product_id_here\",\n    \"currentStock\": 5\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Create Bulk Notifications",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Maintenance\",\n  \"titleAr\": \"صيانة النظام\",\n  \"message\": \"System will be down for maintenance\",\n  \"messageAr\": \"النظام سيكون متوقف للصيانة\",\n  \"type\": \"system\",\n  \"recipientIds\": [\"user_id_1\", \"user_id_2\", \"user_id_3\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/bulk",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "bulk"]
+            }
+          }
+        },
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/my?page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "my"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/unread-count",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/stats?recipientId=user_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "stats"],
+              "query": [
+                {
+                  "key": "recipientId",
+                  "value": "user_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notification by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"readAt\": \"2024-01-01T12:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/:id/read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id", "read"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/mark-all-read",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "mark-all-read"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"message\": \"Updated message\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create System Notification",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Update\",\n  \"titleAr\": \"تحديث النظام\",\n  \"message\": \"New features are available\",\n  \"messageAr\": \"ميزات جديدة متاحة\",\n  \"type\": \"system\",\n  \"recipientIds\": [\"user_id_1\", \"user_id_2\"],\n  \"metadata\": {\n    \"version\": \"1.2.0\",\n    \"features\": [\"feature1\", \"feature2\"]\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/notifications/system",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", "system"]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/notifications/:id",
+              "host": ["{{base_url}}"],
+              "path": ["notifications", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "notification_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/dashboard",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "dashboard"]
+            }
+          }
+        },
+        {
+          "name": "Get Sales Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/sales?startDate=2024-01-01&endDate=2024-01-31&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "sales"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Export Sales Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/sales/export?startDate=2024-01-01&endDate=2024-01-31&format=json&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "sales", "export"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Top Selling Products",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/top-selling-products?startDate=2024-01-01&endDate=2024-01-31&limit=10&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "top-selling-products"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Customer Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/customers?startDate=2024-01-01&endDate=2024-01-31",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "customers"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Inventory Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/inventory?branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "inventory"],
+              "query": [
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Branch Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/branches/performance?startDate=2024-01-01&endDate=2024-01-31",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "branches", "performance"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/products/performance?startDate=2024-01-01&endDate=2024-01-31&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "products", "performance"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Financial Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/financial?startDate=2024-01-01&endDate=2024-01-31&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "financial"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Summary Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/reports/summary?startDate=2024-01-01&endDate=2024-01-31&branchId=branch_id_here",
+              "host": ["{{base_url}}"],
+              "path": ["reports", "summary"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-01-31"
+                },
+                {
+                  "key": "branchId",
+                  "value": "branch_id_here"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Settings",
+      "item": [
+        {
+          "name": "Get Public Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/public",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "public"]
+            }
+          }
+        },
+        {
+          "name": "Get Setting Value",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/value/:key?default=default_value",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "value", ":key"],
+              "query": [
+                {
+                  "key": "default",
+                  "value": "default_value"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "app_name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Multiple Values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/values?keys=app_name,app_version,currency",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "values"],
+              "query": [
+                {
+                  "key": "keys",
+                  "value": "app_name,app_version,currency"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Settings by Category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/category/:category",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "category", ":category"],
+              "variable": [
+                {
+                  "key": "category",
+                  "value": "general"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Cache Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/cache/stats",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "cache", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Create Setting",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"new_setting\",\n  \"value\": \"setting_value\",\n  \"description\": \"Description of the setting\",\n  \"category\": \"general\",\n  \"type\": \"string\",\n  \"isPublic\": false,\n  \"isEditable\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": ["{{base_url}}"],
+              "path": ["settings"]
+            }
+          }
+        },
+        {
+          "name": "Get All Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings?page=1&limit=20&category=general",
+              "host": ["{{base_url}}"],
+              "path": ["settings"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "category",
+                  "value": "general"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Setting by Key",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/:key",
+              "host": ["{{base_url}}"],
+              "path": ["settings", ":key"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "app_name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Setting",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"value\": \"updated_value\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/settings/:key",
+              "host": ["{{base_url}}"],
+              "path": ["settings", ":key"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "app_name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Bulk Update Settings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": [\n    {\n      \"key\": \"app_name\",\n      \"value\": \"Shamra Electronics\"\n    },\n    {\n      \"key\": \"currency\",\n      \"value\": \"SYP\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/settings/bulk-update",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "bulk-update"]
+            }
+          }
+        },
+        {
+          "name": "Reset Setting to Default",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/:key/reset",
+              "host": ["{{base_url}}"],
+              "path": ["settings", ":key", "reset"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "app_name"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Setting",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/:key",
+              "host": ["{{base_url}}"],
+              "path": ["settings", ":key"],
+              "variable": [
+                {
+                  "key": "key",
+                  "value": "setting_to_delete"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clear Cache",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/settings/cache/clear",
+              "host": ["{{base_url}}"],
+              "path": ["settings", "cache", "clear"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seeds",
+      "item": [
+        {
+          "name": "Seed All Data",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/seeds/seed",
+              "host": ["{{base_url}}"],
+              "path": ["seeds", "seed"]
+            }
+          }
+        },
+        {
+          "name": "Clear All Data",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/seeds/clear",
+              "host": ["{{base_url}}"],
+              "path": ["seeds", "clear"]
+            }
+          }
+        },
+        {
+          "name": "Reset Database",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/seeds/reset",
+              "host": ["{{base_url}}"],
+              "path": ["seeds", "reset"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "General",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/",
+              "host": ["{{base_url}}"],
+              "path": [""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

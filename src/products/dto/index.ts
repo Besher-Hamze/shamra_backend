@@ -102,8 +102,13 @@ export class CreateProductDto {
     @IsMongoId()
     categoryId: string;
 
-    @IsMongoId()
-    branchId: string;
+    // list of branches that the product is available in
+    @IsOptional()
+    @IsArray()
+    @IsMongoId({ each: true })
+    branches?: string[];
+
+
 
     @IsOptional()
     @IsMongoId()

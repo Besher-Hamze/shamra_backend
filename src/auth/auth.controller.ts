@@ -11,6 +11,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard, LocalAuthGuard } from './gurads';
 import { LoginDto, RefreshTokenDto, RegisterDto } from './dto';
+import { GetUserId } from 'src/common/decorators';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +27,14 @@ export class AuthController {
             message: 'تم تسجيل الدخول بنجاح',
             data: result,
         };
+    }
+
+    @Post('select-branch')
+    @UseGuards(JwtAuthGuard)
+    @HttpCode(HttpStatus.OK)
+    async selectBranch(@GetUserId() userId: string, @Body("branchId") branchId: string) {
+        const result = await this.authService.selectBranch(userId, branchId);
+        return result;
     }
 
     @Post('register')

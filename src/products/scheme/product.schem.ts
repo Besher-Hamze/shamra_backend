@@ -63,8 +63,10 @@ export class Product {
     @Prop({ trim: true })
     brand: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
-    branchId: Types.ObjectId;
+
+    // list of branches that the product is available in
+    @Prop({ type: [{ type: Types.ObjectId, ref: 'Branch' }], default: [] })
+    branches: Types.ObjectId[];
 
     @Prop({ trim: true })
     model: string;

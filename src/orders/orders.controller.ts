@@ -22,6 +22,7 @@ import {
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
+import { GetUserId } from 'src/common/decorators';
 
 @Controller('orders')
 @UseGuards(JwtAuthGuard)
@@ -97,7 +98,7 @@ export class OrdersController {
         };
     }
 
-    @Get(':id')
+    @Get('by-id/:id')
     @UseGuards(RolesGuard)
     @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
     async findOne(@Param('id') id: string) {
@@ -158,6 +159,17 @@ export class OrdersController {
         return {
             success: true,
             message: 'تم حذف الطلب بنجاح',
+        };
+    }
+    @Get('my')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.CUSTOMER)
+    async getMyOrders(@GetUserId() userId: string) {
+        const orders = await this.ordersService.getMyOrders(userId);
+        return {
+            success: true,
+            message: 'تم جلب طلباتك بنجاح',
+            data: orders,
         };
     }
 }

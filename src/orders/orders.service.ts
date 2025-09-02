@@ -358,4 +358,13 @@ export class OrdersService {
             recentOrders,
         };
     }
+
+    // Get my orders
+    async getMyOrders(userId: string) {
+        const orders = await this.orderModel
+            .find({ customerId: userId, isDeleted: { $ne: true } })
+            .exec();
+
+        return orders;
+    }
 }

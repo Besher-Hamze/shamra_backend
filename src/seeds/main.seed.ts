@@ -12,7 +12,7 @@ export class MainSeedService implements OnModuleInit {
         private readonly categoriesSeedService: CategoriesSeedService,
         private readonly productsSeedService: ProductsSeedService,
         private readonly settingsSeedService: SettingsSeedService,
-        private readonly subCategoriesSeedService: SubCategoriesSeedService,
+        private readonly subCategoriesSeedService: SubCategoriesSeedService
     ) { }
 
     async onModuleInit() {

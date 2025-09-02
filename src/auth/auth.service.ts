@@ -2,6 +2,7 @@ import {
     Injectable,
     UnauthorizedException,
     ConflictException,
+    NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -10,6 +11,7 @@ import { UsersService } from '../users/users.service';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dto';
 import { UserRole } from 'src/common/enums';
 import { JwtPayload } from 'src/common/interfaces';
+import { BranchesService } from 'src/branches/branches.service';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +19,7 @@ export class AuthService {
         private usersService: UsersService,
         private jwtService: JwtService,
         private configService: ConfigService,
+        private branchesService: BranchesService,
     ) { }
 
     // Validate user credentials
@@ -46,12 +49,17 @@ export class AuthService {
         if (!user) {
             throw new UnauthorizedException('بيانات الدخول غير صحيحة');
         }
+        const defaultBranch = await this.branchesService.getDefaultBranch();
 
+        if (!defaultBranch) {
+            throw new NotFoundException('الفرع الرئيسي غير موجود');
+        }
         const payload: JwtPayload = {
             sub: user._id.toString(),
             email: user.email,
             role: user.role,
             branchId: user.branchId?.toString(),
+            selectedBranchId: defaultBranch?._id.toString(),
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -71,6 +79,47 @@ export class AuthService {
                 email: user.email,
                 role: user.role,
                 branchId: user.branchId?.toString(),
+            },
+        };
+    }
+
+
+    // generate a new token when i  select branch 
+    async selectBranch(userId: string, branchId: string) {
+        const user = await this.usersService.findById(userId);
+        if (!user) {
+            throw new NotFoundException('مستخدم غير موجود');
+        }
+        const selectedBranchId = await this.branchesService.findById(branchId);
+        user.branchId = selectedBranchId._id;
+        const payload: JwtPayload = {
+            sub: user._id.toString(),
+            email: user.email,
+            role: user.role,
+            branchId: user.branchId?.toString(),
+            selectedBranchId: selectedBranchId._id.toString(),
+        };
+        const accessToken = this.jwtService.sign(payload);
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+            expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+        });
+        return {
+            success: true,
+            message: 'تم اختيار الفرع بنجاح',
+            data: {
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                user: {
+                    _id: user._id.toString(),
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    fullName: user.fullName,
+                    email: user.email,
+                    role: user.role,
+                    branchId: user.branchId?.toString(),
+                    selectedBranchId: selectedBranchId._id.toString(),
+                },
             },
         };
     }

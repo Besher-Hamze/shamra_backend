@@ -160,6 +160,13 @@ export class BranchesService {
         return branch;
     }
 
+    // Get default branch
+    async getDefaultBranch(): Promise<Branch> {
+        const defaultBranch = await this.branchModel
+            .findOne({ isMainBranch: true, isDeleted: { $ne: true } })
+            .exec();
+        return defaultBranch;
+    }
     // Get active branches (for dropdowns, etc.)
     async getActiveBranches() {
         const branches = await this.branchModel

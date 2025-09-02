@@ -29,7 +29,7 @@ export class ProductsService {
 
     // Create new product
     async create(createProductDto: CreateProductDto, userId: string): Promise<Product> {
-        const { sku, slug, categoryId, subCategoryId, branchId } = createProductDto;
+        const { sku, slug, categoryId, subCategoryId, branches } = createProductDto;
 
         // Check if SKU already exists
         if (sku) {
@@ -67,9 +67,9 @@ export class ProductsService {
         }
 
         // Validate branch
-        const branch = await this.branchModel.findById(branchId).exec();
-        if (!branch || branch.isDeleted || !branch.isActive) {
-            throw new NotFoundException('Branch not found or inactive');
+        const branch = await this.branchModel.find({ _id: { $in: branches } }).exec();
+        if (!branch || branch.length === 0 || branch.some(b => b.isDeleted || !b.isActive)) {
+            throw new NotFoundException('Branch not found');
         }
 
         const product = new this.productModel({
@@ -153,11 +153,11 @@ export class ProductsService {
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .populate('categoryId', 'name nameAr slug')
-            .populate('subCategoryId', 'name nameAr')
-            .populate('additionalCategories', 'name nameAr slug')
-            .populate('createdBy', 'firstName lastName')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('subCategoryId', 'name nameAr')
+            // .populate('additionalCategories', 'name nameAr slug')
+            // .populate('createdBy', 'firstName lastName')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         return {
@@ -177,12 +177,12 @@ export class ProductsService {
     async findById(id: string): Promise<Product> {
         const product = await this.productModel
             .findById(id)
-            .populate('categoryId', 'name nameAr slug')
-            .populate('subCategoryId', 'name nameAr')
-            .populate('additionalCategories', 'name nameAr slug')
-            .populate('createdBy', 'firstName lastName')
-            .populate('updatedBy', 'firstName lastName')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('subCategoryId', 'name nameAr')
+            // .populate('additionalCategories', 'name nameAr slug')
+            // .populate('createdBy', 'firstName lastName')
+            // .populate('updatedBy', 'firstName lastName')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -201,8 +201,8 @@ export class ProductsService {
     async findBySku(sku: string): Promise<Product> {
         const product = await this.productModel
             .findOne({ sku, isDeleted: { $ne: true } })
-            .populate('categoryId', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product) {
@@ -216,9 +216,9 @@ export class ProductsService {
     async findBySlug(slug: string): Promise<Product> {
         const product = await this.productModel
             .findOne({ slug, isDeleted: { $ne: true } })
-            .populate('categoryId', 'name nameAr slug')
-            .populate('additionalCategories', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('additionalCategories', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product) {
@@ -285,9 +285,9 @@ export class ProductsService {
                 { ...updateProductDto, updatedBy: userId },
                 { new: true }
             )
-            .populate('categoryId', 'name nameAr slug')
-            .populate('additionalCategories', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('additionalCategories', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -308,7 +308,7 @@ export class ProductsService {
                 },
                 { new: true }
             )
-            .populate('branchId', 'name nameAr')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -326,7 +326,7 @@ export class ProductsService {
                 { ...updatePriceDto, updatedBy: userId },
                 { new: true }
             )
-            .populate('branchId', 'name nameAr')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -391,8 +391,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ sortOrder: 1, createdAt: -1 })
-            .populate('categoryId', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         return products;
@@ -408,8 +408,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ createdAt: -1 })
-            .populate('categoryId', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         return products;
@@ -425,8 +425,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ stockQuantity: 1 })
-            .populate('categoryId', 'name nameAr slug')
-            .populate('branchId', 'name nameAr')
+            // .populate('categoryId', 'name nameAr slug')
+            // .populate('branchId', 'name nameAr')
             .exec();
 
         return products;
