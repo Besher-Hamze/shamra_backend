@@ -1,7 +1,6 @@
 import { Controller, Post, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
 import { MainSeedService } from './main.seed';
-import { JwtAuthGuard } from '../common/guards/jwt-auth/jwt-auth.guard';
-import { RolesGuard } from '../auth/gurads';
+import { JwtAuthGuard, RolesGuard } from '../auth/gurads';
 import { Roles } from '../auth/decorators/role.decorator';
 import { UserRole } from '../common/enums';
 

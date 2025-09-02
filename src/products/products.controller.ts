@@ -107,25 +107,7 @@ export class ProductsController {
         };
     }
 
-    @Get('sku/:sku')
-    async findBySku(@Param('sku') sku: string) {
-        const product = await this.productsService.findBySku(sku);
-        return {
-            success: true,
-            message: 'تم جلب المنتج بنجاح',
-            data: product,
-        };
-    }
 
-    @Get('slug/:slug')
-    async findBySlug(@Param('slug') slug: string) {
-        const product = await this.productsService.findBySlug(slug);
-        return {
-            success: true,
-            message: 'تم جلب المنتج بنجاح',
-            data: product,
-        };
-    }
 
     @Get(':id')
     async findOne(@Param('id') id: string) {

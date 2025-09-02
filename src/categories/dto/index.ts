@@ -9,6 +9,7 @@ import {
     IsUrl,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import { PartialType } from '@nestjs/mapped-types';
 
 // Create Category DTO
 export class CreateCategoryDto {
@@ -17,38 +18,9 @@ export class CreateCategoryDto {
     @MaxLength(100)
     name: string;
 
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    nameAr: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    description?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    descriptionAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    slug?: string;
-
     @IsOptional()
     @IsUrl()
     image?: string;
-
-    @IsOptional()
-    @IsString()
-    icon?: string;
-
-    @IsOptional()
-    @IsMongoId()
-    parentId?: string;
 
     @IsOptional()
     @IsNumber()
@@ -64,59 +36,7 @@ export class CreateCategoryDto {
 }
 
 // Update Category DTO
-export class UpdateCategoryDto {
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    name?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    nameAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    description?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    descriptionAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    slug?: string;
-
-    @IsOptional()
-    @IsUrl()
-    image?: string;
-
-    @IsOptional()
-    @IsString()
-    icon?: string;
-
-    @IsOptional()
-    @IsMongoId()
-    parentId?: string;
-
-    @IsOptional()
-    @IsNumber()
-    sortOrder?: number;
-
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
-
-    @IsOptional()
-    @IsBoolean()
-    isFeatured?: boolean;
-}
+export class UpdateCategoryDto extends PartialType(CreateCategoryDto) { }
 
 // Category Query DTO
 export class CategoryQueryDto {
@@ -134,9 +54,7 @@ export class CategoryQueryDto {
     @IsString()
     sort?: string = 'sortOrder';
 
-    @IsOptional()
-    @IsMongoId()
-    parentId?: string;
+
 
     @IsOptional()
     @IsBoolean()
@@ -153,10 +71,6 @@ export class CategoryQueryDto {
     @Transform(({ value }) => value === 'true')
     rootOnly?: boolean; // Get only root categories (no parent)
 
-    @IsOptional()
-    @IsBoolean()
-    @Transform(({ value }) => value === 'true')
-    withChildren?: boolean; // Include children in response
 
     @IsOptional()
     @IsString()

@@ -56,15 +56,7 @@ export class CategoriesController {
         };
     }
 
-    @Get('tree')
-    async getCategoryTree() {
-        const tree = await this.categoriesService.getCategoryTree();
-        return {
-            success: true,
-            message: 'تم جلب شجرة التصنيفات بنجاح',
-            data: tree,
-        };
-    }
+
 
     @Get('stats')
     @UseGuards(JwtAuthGuard, RolesGuard)

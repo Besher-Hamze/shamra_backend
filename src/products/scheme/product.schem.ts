@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { ProductStatus } from 'src/common/enums';
 
 export type ProductDocument = Product & Document;
@@ -9,20 +9,12 @@ export class Product {
     @Prop({ required: true, trim: true })
     name: string;
 
-    @Prop({ required: true, trim: true })
-    nameAr: string;
 
     @Prop({ trim: true })
     description: string;
 
-    @Prop({ trim: true })
-    descriptionAr: string;
-
-    @Prop({ required: true, unique: true })
-    sku: string; // Stock Keeping Unit
-
-    @Prop({ required: true, unique: true })
-    slug: string;
+    @Prop({ type: Map, of: mongoose.Schema.Types.Mixed })
+    specifications: Map<string, any>;
 
     @Prop()
     barcode: string;
@@ -51,9 +43,6 @@ export class Product {
     @Prop({ type: Types.ObjectId, ref: 'SubCategory', required: true })
     subCategoryId: Types.ObjectId;
 
-    @Prop({ type: [{ type: Types.ObjectId, ref: 'Category' }], default: [] })
-    additionalCategories: Types.ObjectId[];
-
     @Prop({ type: [String], default: [] })
     images: string[];
 
@@ -67,25 +56,6 @@ export class Product {
     // list of branches that the product is available in
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Branch' }], default: [] })
     branches: Types.ObjectId[];
-
-    @Prop({ trim: true })
-    model: string;
-
-    @Prop({ default: 0 })
-    weight: number; // in grams
-
-    @Prop({
-        type: {
-            length: Number,
-            width: Number,
-            height: Number,
-        },
-    })
-    dimensions: {
-        length?: number;
-        width?: number;
-        height?: number;
-    };
 
     @Prop({ type: String, enum: ProductStatus, default: ProductStatus.ACTIVE })
     status: ProductStatus;
@@ -101,13 +71,6 @@ export class Product {
 
     @Prop({ type: [String], default: [] })
     tags: string[];
-
-    // SEO fields
-    @Prop()
-    metaTitle: string;
-
-    @Prop()
-    metaDescription: string;
 
     @Prop({ type: [String], default: [] })
     keywords: string[];
@@ -142,7 +105,6 @@ export const ProductSchema = SchemaFactory.createForClass(Product);
 
 // Indexes
 ProductSchema.index({ name: 1 });
-ProductSchema.index({ nameAr: 1 });
 // sku and slug indexes are already created by @Prop({ unique: true })
 ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ categoryId: 1 });
@@ -169,10 +131,7 @@ ProductSchema.index({ brand: 1, categoryId: 1, subCategoryId: 1 });
 // Text index for search
 ProductSchema.index({
     name: 'text',
-    nameAr: 'text',
     description: 'text',
-    descriptionAr: 'text',
-    sku: 'text',
     brand: 'text',
     tags: 'text',
 });
@@ -207,21 +166,6 @@ ProductSchema.virtual('stockStatus').get(function () {
 
 // Pre-save middleware
 ProductSchema.pre('save', function (next) {
-    // Generate SKU if not provided
-    if (!this.sku) {
-        this.sku = `PRD-${Date.now()}`;
-    }
-
-    // Generate slug if not provided
-    if (this.isModified('name') && !this.slug) {
-        this.slug = this.name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    }
-
     // Set main image from images array if not set
     if (!this.mainImage && this.images.length > 0) {
         this.mainImage = this.images[0];

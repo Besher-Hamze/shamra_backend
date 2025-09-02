@@ -29,24 +29,7 @@ export class ProductsService {
 
     // Create new product
     async create(createProductDto: CreateProductDto, userId: string): Promise<Product> {
-        const { sku, slug, categoryId, subCategoryId, branches } = createProductDto;
-
-        // Check if SKU already exists
-        if (sku) {
-            const existingProduct = await this.productModel.findOne({ sku }).exec();
-            if (existingProduct) {
-                throw new ConflictException('Product with this SKU already exists');
-            }
-        }
-
-        // Generate slug if not provided
-        let finalSlug = slug || this.generateSlug(createProductDto.name);
-
-        // Ensure slug uniqueness
-        const existingSlug = await this.productModel.findOne({ slug: finalSlug }).exec();
-        if (existingSlug) {
-            finalSlug = `${finalSlug}-${Date.now()}`;
-        }
+        const { categoryId, subCategoryId, branches } = createProductDto;
 
         // Validate category
         const category = await this.categoryModel.findById(categoryId).exec();
@@ -74,7 +57,6 @@ export class ProductsService {
 
         const product = new this.productModel({
             ...createProductDto,
-            slug: finalSlug,
             createdBy: userId,
             updatedBy: userId,
         });
@@ -197,65 +179,12 @@ export class ProductsService {
         return product;
     }
 
-    // Find product by SKU
-    async findBySku(sku: string): Promise<Product> {
-        const product = await this.productModel
-            .findOne({ sku, isDeleted: { $ne: true } })
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
-            .exec();
-
-        if (!product) {
-            throw new NotFoundException('Product not found');
-        }
-
-        return product;
-    }
-
-    // Find product by slug
-    async findBySlug(slug: string): Promise<Product> {
-        const product = await this.productModel
-            .findOne({ slug, isDeleted: { $ne: true } })
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('additionalCategories', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
-            .exec();
-
-        if (!product) {
-            throw new NotFoundException('Product not found');
-        }
-
-        // Increment view count
-        await this.productModel
-            .findByIdAndUpdate(product._id, { $inc: { viewCount: 1 } })
-            .exec();
-
-        return product;
-    }
-
     // Update product
     async update(id: string, updateProductDto: UpdateProductDto, userId: string): Promise<Product> {
-        const { sku, slug, categoryId } = updateProductDto;
+        const { categoryId } = updateProductDto;
 
-        // Check if SKU is being changed and if it's already taken
-        if (sku) {
-            const existingProduct = await this.productModel
-                .findOne({ sku, _id: { $ne: id } })
-                .exec();
-            if (existingProduct) {
-                throw new ConflictException('SKU already taken by another product');
-            }
-        }
 
-        // Check if slug is being changed and if it's already taken
-        if (slug) {
-            const existingProduct = await this.productModel
-                .findOne({ slug, _id: { $ne: id } })
-                .exec();
-            if (existingProduct) {
-                throw new ConflictException('Slug already taken by another product');
-            }
-        }
+
 
         // Validate category if being changed
         if (categoryId) {
@@ -285,9 +214,6 @@ export class ProductsService {
                 { ...updateProductDto, updatedBy: userId },
                 { new: true }
             )
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('additionalCategories', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {

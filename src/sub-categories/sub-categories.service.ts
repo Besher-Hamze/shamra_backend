@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { SubCategory, SubCategoryDocument } from './scheme/sub-category.scheme';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
@@ -41,14 +41,12 @@ export class SubCategoriesService {
 
         return await this.subCategoryModel
             .find(filter)
-            .populate('categoryId', 'name nameAr')
             .exec();
     }
 
     async findOne(id: string): Promise<SubCategory> {
         const subCategory = await this.subCategoryModel
             .findOne({ _id: id, isDeleted: false })
-            .populate('categoryId', 'name nameAr')
             .exec();
 
         if (!subCategory) {
@@ -59,8 +57,9 @@ export class SubCategoriesService {
     }
 
     async findByCategory(categoryId: string): Promise<SubCategory[]> {
+        const objectId = new Types.ObjectId(categoryId);
         return await this.subCategoryModel
-            .find({ categoryId, isActive: true, isDeleted: false })
+            .find({ categoryId: objectId, isActive: true, isDeleted: false })
             .exec();
     }
 
@@ -71,7 +70,6 @@ export class SubCategoriesService {
                 updateSubCategoryDto,
                 { new: true }
             )
-            .populate('categoryId', 'name nameAr')
             .exec();
 
         if (!subCategory) {

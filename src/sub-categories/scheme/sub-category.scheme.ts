@@ -10,8 +10,8 @@ export class SubCategory {
     @Prop({ required: true, trim: true })
     name: string;
 
-    @Prop({ required: true, trim: true })
-    nameAr: string;
+    @Prop()
+    image: string;
 
     @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
     categoryId: Types.ObjectId; // Parent category

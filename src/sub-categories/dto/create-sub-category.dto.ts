@@ -4,8 +4,8 @@ export class CreateSubCategoryDto {
     @IsString()
     name: string;
 
-    @IsString()
-    nameAr: string;
+    @IsOptional()
+    image?: string;
 
     @IsMongoId()
     categoryId: string;

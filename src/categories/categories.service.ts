@@ -21,42 +21,14 @@ export class CategoriesService {
 
     // Create new category
     async create(createCategoryDto: CreateCategoryDto, userId: string): Promise<Category> {
-        const { name, slug, parentId } = createCategoryDto;
-
-        // Generate slug if not provided
-        let finalSlug = slug || this.generateSlug(name);
-
-        // Check if slug already exists
-        const existingCategory = await this.categoryModel.findOne({ slug: finalSlug }).exec();
-        if (existingCategory) {
-            finalSlug = `${finalSlug}-${Date.now()}`;
-        }
-
-        // Validate parent category if provided
-        if (parentId) {
-            const parentCategory = await this.categoryModel.findById(parentId).exec();
-            if (!parentCategory || parentCategory.isDeleted) {
-                throw new NotFoundException('Parent category not found');
-            }
-        }
 
         const category = new this.categoryModel({
             ...createCategoryDto,
-            slug: finalSlug,
             createdBy: userId,
             updatedBy: userId,
         });
 
         const savedCategory = await category.save();
-
-        // Update parent's children array
-        if (parentId) {
-            await this.categoryModel
-                .findByIdAndUpdate(parentId, {
-                    $addToSet: { children: savedCategory._id },
-                })
-                .exec();
-        }
 
         return savedCategory;
     }
@@ -67,20 +39,16 @@ export class CategoriesService {
             page = 1,
             limit = 20,
             sort = 'sortOrder',
-            parentId,
+
             isActive,
             isFeatured,
             rootOnly,
-            withChildren,
             search,
         } = query;
 
         // Build filter
         const filter: any = { isDeleted: { $ne: true } };
 
-        if (parentId !== undefined) {
-            filter.parentId = parentId === 'null' ? null : parentId;
-        }
 
         if (rootOnly) {
             filter.parentId = null;
@@ -112,10 +80,7 @@ export class CategoriesService {
             .populate('createdBy', 'firstName lastName')
             .populate('updatedBy', 'firstName lastName');
 
-        // Populate children if requested
-        if (withChildren) {
-            categoriesQuery = categoriesQuery.populate('children', 'name nameAr slug isActive');
-        }
+
 
         const categories = await categoriesQuery.exec();
 
@@ -166,63 +131,10 @@ export class CategoriesService {
         return category;
     }
 
-    // Get category tree (hierarchical structure)
-    async getCategoryTree(): Promise<any[]> {
-        const categories = await this.categoryModel
-            .find({ isDeleted: { $ne: true }, isActive: true })
-            .sort('sortOrder')
-            .exec();
 
-        return this.buildCategoryTree(categories);
-    }
 
     // Update category
     async update(id: string, updateCategoryDto: UpdateCategoryDto, userId: string): Promise<Category> {
-        const { slug, parentId } = updateCategoryDto;
-
-        // Check if slug is being changed and if it's already taken
-        if (slug) {
-            const existingCategory = await this.categoryModel
-                .findOne({ slug, _id: { $ne: id } })
-                .exec();
-            if (existingCategory) {
-                throw new ConflictException('Slug already taken by another category');
-            }
-        }
-
-        // Validate parent category if being changed
-        if (parentId !== undefined) {
-            if (parentId) {
-                const parentCategory = await this.categoryModel.findById(parentId).exec();
-                if (!parentCategory || parentCategory.isDeleted) {
-                    throw new NotFoundException('Parent category not found');
-                }
-
-                // Prevent circular reference
-                if (parentId === id) {
-                    throw new BadRequestException('Category cannot be its own parent');
-                }
-            }
-
-            // Update previous parent's children array
-            const currentCategory = await this.categoryModel.findById(id).exec();
-            if (currentCategory && currentCategory.parentId) {
-                await this.categoryModel
-                    .findByIdAndUpdate(currentCategory.parentId, {
-                        $pull: { children: id },
-                    })
-                    .exec();
-            }
-
-            // Update new parent's children array
-            if (parentId) {
-                await this.categoryModel
-                    .findByIdAndUpdate(parentId, {
-                        $addToSet: { children: id },
-                    })
-                    .exec();
-            }
-        }
 
         const category = await this.categoryModel
             .findByIdAndUpdate(
@@ -246,24 +158,13 @@ export class CategoriesService {
             throw new NotFoundException('Category not found');
         }
 
-        // Check if category has children
-        if (category.children && category.children.length > 0) {
-            throw new BadRequestException('Cannot delete category with children');
-        }
 
         // Check if category has products
         if (category.productCount > 0) {
             throw new BadRequestException('Cannot delete category with products');
         }
 
-        // Remove from parent's children array
-        if (category.parentId) {
-            await this.categoryModel
-                .findByIdAndUpdate(category.parentId, {
-                    $pull: { children: id },
-                })
-                .exec();
-        }
+
 
         await this.categoryModel
             .findByIdAndUpdate(id, {
@@ -348,24 +249,4 @@ export class CategoriesService {
             .trim();
     }
 
-    private buildCategoryTree(categories: Category[], parentId: any = null): any[] {
-        const tree: any[] = [];
-
-        const parentCategories = categories.filter(
-            (cat) => String(cat.parentId) === String(parentId),
-        );
-
-        for (const parent of parentCategories) {
-            const children = this.buildCategoryTree(categories, parent._id);
-            const treeItem = {
-                ...parent,
-                childrenData: children,
-                level: parentId === null ? 0 : 1,
-                hasChildren: children.length > 0,
-            };
-            tree.push(treeItem);
-        }
-
-        return tree;
-    }
 }

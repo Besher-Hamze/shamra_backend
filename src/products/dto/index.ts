@@ -11,9 +11,11 @@ import {
     MinLength,
     MaxLength,
     ValidateNested,
+    IsObject,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { ProductStatus } from 'src/common/enums';
+import { PartialType } from '@nestjs/mapped-types';
 
 // Dimensions DTO
 export class DimensionsDto {
@@ -40,32 +42,16 @@ export class CreateProductDto {
     @MaxLength(200)
     name: string;
 
-    @IsString()
-    @MinLength(2)
-    @MaxLength(200)
-    nameAr: string;
 
     @IsOptional()
     @IsString()
     @MaxLength(1000)
     description?: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(1000)
-    descriptionAr?: string;
 
-    @IsOptional()
-    @IsString()
-    @MinLength(3)
-    @MaxLength(50)
-    sku?: string;
 
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(200)
-    slug?: string;
+
+
 
     @IsOptional()
     @IsString()
@@ -110,14 +96,10 @@ export class CreateProductDto {
 
 
 
-    @IsOptional()
     @IsMongoId()
     subCategoryId?: string;
 
-    @IsOptional()
-    @IsArray()
-    @IsMongoId({ each: true })
-    additionalCategories?: string[];
+
 
     @IsOptional()
     @IsArray()
@@ -134,19 +116,8 @@ export class CreateProductDto {
     brand?: string;
 
     @IsOptional()
-    @IsString()
-    @MaxLength(100)
-    model?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    weight?: number;
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => DimensionsDto)
-    dimensions?: DimensionsDto;
+    @IsObject()
+    specifications?: Record<string, any>;
 
     @IsOptional()
     @IsEnum(ProductStatus)
@@ -170,16 +141,6 @@ export class CreateProductDto {
     tags?: string[];
 
     @IsOptional()
-    @IsString()
-    @MaxLength(60)
-    metaTitle?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(160)
-    metaDescription?: string;
-
-    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     keywords?: string[];
@@ -188,167 +149,11 @@ export class CreateProductDto {
     @IsNumber()
     @Min(0)
     sortOrder?: number = 0;
+
 }
 
 // Update Product DTO
-export class UpdateProductDto {
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(200)
-    name?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(200)
-    nameAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(1000)
-    description?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(1000)
-    descriptionAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(3)
-    @MaxLength(50)
-    sku?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(200)
-    slug?: string;
-
-    @IsOptional()
-    @IsString()
-    barcode?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    price?: number;
-
-    @IsOptional()
-    @IsMongoId()
-    branchId?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    costPrice?: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    salePrice?: number;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(3)
-    currency?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    stockQuantity?: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    minStockLevel?: number;
-
-    @IsOptional()
-    @IsMongoId()
-    categoryId?: string;
-
-    @IsOptional()
-    @IsMongoId()
-    subCategoryId?: string;
-
-    @IsOptional()
-    @IsArray()
-    @IsMongoId({ each: true })
-    additionalCategories?: string[];
-
-    @IsOptional()
-    @IsArray()
-    @IsUrl({}, { each: true })
-    images?: string[];
-
-    @IsOptional()
-    @IsUrl()
-    mainImage?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(100)
-    brand?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(100)
-    model?: string;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    weight?: number;
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => DimensionsDto)
-    dimensions?: DimensionsDto;
-
-    @IsOptional()
-    @IsEnum(ProductStatus)
-    status?: ProductStatus;
-
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
-
-    @IsOptional()
-    @IsBoolean()
-    isFeatured?: boolean;
-
-    @IsOptional()
-    @IsBoolean()
-    isOnSale?: boolean;
-
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    tags?: string[];
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(60)
-    metaTitle?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(160)
-    metaDescription?: string;
-
-    @IsOptional()
-    @IsArray()
-    @IsString({ each: true })
-    keywords?: string[];
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    sortOrder?: number;
-}
-
-// Product Query DTO
+export class UpdateProductDto extends PartialType(CreateProductDto) { }
 export class ProductQueryDto {
     @IsOptional()
     @Type(() => Number)
