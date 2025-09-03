@@ -3,10 +3,8 @@ import {
     IsOptional,
     IsBoolean,
     IsNumber,
-    IsMongoId,
     MinLength,
     MaxLength,
-    IsUrl,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { PartialType } from '@nestjs/mapped-types';
@@ -19,7 +17,6 @@ export class CreateCategoryDto {
     name: string;
 
     @IsOptional()
-    @IsUrl()
     image?: string;
 
     @IsOptional()

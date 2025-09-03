@@ -11,6 +11,7 @@ import {
     Request,
     HttpCode,
     HttpStatus,
+    UploadedFiles,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import {
@@ -22,6 +23,7 @@ import {
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
+import { CategoryImagesUpload } from 'src/common/decorators';
 
 @Controller('categories')
 export class CategoriesController {
@@ -30,10 +32,20 @@ export class CategoriesController {
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @CategoryImagesUpload()
     async create(
         @Body() createCategoryDto: CreateCategoryDto,
         @Request() req,
+        @UploadedFiles() files: {
+            image?: Express.Multer.File[];
+            banner?: Express.Multer.File[];
+        },
     ) {
+        // Handle uploaded files
+        if (files.image && files.image[0]) {
+            const imageFile = files.image[0];
+            createCategoryDto.image = `/uploads/categories/${imageFile.filename}`;
+        }
         const category = await this.categoriesService.create(
             createCategoryDto,
             req.user.sub,
@@ -70,21 +82,7 @@ export class CategoriesController {
         };
     }
 
-    @Get('slug/:slug')
-    async findBySlug(
-        @Param('slug') slug: string,
-        @Query('withChildren') withChildren?: string,
-    ) {
-        const category = await this.categoriesService.findBySlug(
-            slug,
-            withChildren === 'true',
-        );
-        return {
-            success: true,
-            message: 'تم جلب التصنيف بنجاح',
-            data: category,
-        };
-    }
+
 
     @Get(':id')
     async findOne(
@@ -105,11 +103,21 @@ export class CategoriesController {
     @Patch(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @CategoryImagesUpload()
     async update(
         @Param('id') id: string,
         @Body() updateCategoryDto: UpdateCategoryDto,
         @Request() req,
+        @UploadedFiles() files: {
+            image?: Express.Multer.File[];
+            banner?: Express.Multer.File[];
+        },
     ) {
+        // Handle uploaded files
+        if (files.image && files.image[0]) {
+            const imageFile = files.image[0];
+            updateCategoryDto.image = `/uploads/categories/${imageFile.filename}`;
+        }
         const category = await this.categoriesService.update(
             id,
             updateCategoryDto,

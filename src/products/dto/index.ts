@@ -6,7 +6,6 @@ import {
     IsEnum,
     IsMongoId,
     IsArray,
-    IsUrl,
     Min,
     MinLength,
     MaxLength,
@@ -47,11 +46,6 @@ export class CreateProductDto {
     @IsString()
     @MaxLength(1000)
     description?: string;
-
-
-
-
-
 
     @IsOptional()
     @IsString()
@@ -103,11 +97,9 @@ export class CreateProductDto {
 
     @IsOptional()
     @IsArray()
-    @IsUrl({}, { each: true })
     images?: string[];
 
     @IsOptional()
-    @IsUrl()
     mainImage?: string;
 
     @IsOptional()
@@ -152,8 +144,80 @@ export class CreateProductDto {
 
 }
 
+// Create Product Form Data DTO (for file uploads)
+export class CreateProductFormDataDto {
+    @MinLength(2)
+    @MaxLength(200)
+    name: string;
+
+    @IsOptional()
+    @MaxLength(1000)
+    description?: string;
+
+    @IsOptional()
+    barcode?: string;
+
+    price: string;
+
+    costPrice: string;
+
+    @IsOptional()
+    salePrice?: string;
+
+    @IsOptional()
+    @MaxLength(3)
+    currency?: string = 'SYP';
+
+    @IsOptional()
+    stockQuantity?: string = '0';
+
+    @IsOptional()
+    minStockLevel?: string = '5';
+
+    @IsOptional()
+    categoryId: string;
+
+    @IsOptional()
+    subCategoryId: string;
+
+    @IsOptional()
+    branches?: string;
+
+    @IsOptional()
+    @MaxLength(100)
+    brand?: string;
+
+    @IsOptional()
+    specifications?: string;
+
+    @IsOptional()
+    @IsEnum(ProductStatus)
+    status?: string = ProductStatus.ACTIVE;
+
+    @IsOptional()
+    isActive?: string = 'true';
+
+    @IsOptional()
+    isFeatured?: string = 'false';
+
+    @IsOptional()
+    isOnSale?: string = 'false';
+
+    @IsOptional()
+    tags?: string;
+
+    @IsOptional()
+    keywords?: string;
+
+    @IsOptional()
+    sortOrder?: string = '0';
+}
+
 // Update Product DTO
 export class UpdateProductDto extends PartialType(CreateProductDto) { }
+
+// Update Product Form Data DTO (for file uploads)
+export class UpdateProductFormDataDto extends PartialType(CreateProductFormDataDto) { }
 export class ProductQueryDto {
     @IsOptional()
     @Type(() => Number)

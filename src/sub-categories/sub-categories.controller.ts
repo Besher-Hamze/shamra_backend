@@ -8,6 +8,7 @@ import {
     Delete,
     Query,
     UseGuards,
+    UploadedFiles,
 } from '@nestjs/common';
 import { SubCategoriesService } from './sub-categories.service';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
@@ -16,6 +17,7 @@ import { SubCategoryQueryDto } from './dto/sub-category-query.dto';
 import { JwtAuthGuard, RolesGuard } from '../auth/gurads';
 import { Roles } from '../auth/decorators/role.decorator';
 import { UserRole } from '../common/enums';
+import { SubCategoryImagesUpload } from 'src/common/decorators';
 
 @Controller('sub-categories')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -24,7 +26,11 @@ export class SubCategoriesController {
 
     @Post()
     @Roles(UserRole.ADMIN, UserRole.MANAGER)
-    create(@Body() createSubCategoryDto: CreateSubCategoryDto) {
+    @SubCategoryImagesUpload()
+    create(@Body() createSubCategoryDto: CreateSubCategoryDto, @UploadedFiles() files: { image?: Express.Multer.File[] }) {
+        if (files.image && files.image[0]) {
+            createSubCategoryDto.image = `/uploads/sub-categories/${files.image[0].filename}`;
+        }
         return this.subCategoriesService.create(createSubCategoryDto);
     }
 
@@ -45,7 +51,10 @@ export class SubCategoriesController {
     }
 
     @Patch(':id')
-    update(@Param('id') id: string, @Body() updateSubCategoryDto: UpdateSubCategoryDto) {
+    update(@Param('id') id: string, @Body() updateSubCategoryDto: UpdateSubCategoryDto, @UploadedFiles() files: { image?: Express.Multer.File[] }) {
+        if (files.image && files.image[0]) {
+            updateSubCategoryDto.image = `/uploads/sub-categories/${files.image[0].filename}`;
+        }
         return this.subCategoriesService.update(id, updateSubCategoryDto);
     }
 
@@ -54,3 +63,5 @@ export class SubCategoriesController {
         return this.subCategoriesService.remove(id);
     }
 }
+
+

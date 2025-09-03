@@ -6,6 +6,7 @@ import { Product, ProductSchema } from './scheme/product.schem';
 import { Category, CategorySchema } from 'src/categories/scheme/category.scheme';
 import { SubCategory, SubCategorySchema } from 'src/sub-categories/scheme/sub-category.scheme';
 import { Branch, BranchSchema } from 'src/branches/scheme/branche.scheme';
+import { FilesService } from 'src/files/files.service';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { Branch, BranchSchema } from 'src/branches/scheme/branche.scheme';
     ]),
   ],
   controllers: [ProductsController],
-  providers: [ProductsService],
+  providers: [ProductsService, FilesService],
   exports: [ProductsService],
 })
 export class ProductsModule { }

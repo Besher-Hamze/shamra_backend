@@ -38,7 +38,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
     CustomersModule,
     OrdersModule,
     NotificationsModule,
-    InventoryModule,
+    // InventoryModule,
     ReportsModule,
     SettingsModule,
     SubCategoriesModule,

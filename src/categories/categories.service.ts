@@ -114,22 +114,7 @@ export class CategoriesService {
         return category;
     }
 
-    // Find category by slug
-    async findBySlug(slug: string, withChildren = false): Promise<Category> {
-        let query = this.categoryModel.findOne({ slug, isDeleted: { $ne: true } });
 
-        if (withChildren) {
-            query = query.populate('children', 'name nameAr slug isActive sortOrder');
-        }
-
-        const category = await query.exec();
-
-        if (!category) {
-            throw new NotFoundException('Category not found');
-        }
-
-        return category;
-    }
 
 
 
@@ -239,14 +224,6 @@ export class CategoriesService {
         };
     }
 
-    // Private helper methods
-    private generateSlug(name: string): string {
-        return name
-            .toLowerCase()
-            .replace(/[^a-z0-9\s-]/g, '')
-            .replace(/\s+/g, '-')
-            .replace(/-+/g, '-')
-            .trim();
-    }
+
 
 }

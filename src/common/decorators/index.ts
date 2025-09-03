@@ -3,6 +3,9 @@ import { createParamDecorator, ExecutionContext, UnauthorizedException } from '@
 import { Request } from 'express';
 import { JwtPayload } from '../interfaces';
 
+// Export file upload decorators
+export * from './file-upload.decorator';
+
 export const GetUserId = createParamDecorator(
     (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest<Request>();

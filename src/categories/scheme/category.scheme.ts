@@ -39,9 +39,7 @@ export const CategorySchema = SchemaFactory.createForClass(Category);
 
 // Indexes
 CategorySchema.index({ name: 1 });
-CategorySchema.index({ nameAr: 1 });
 // slug index is already created by @Prop({ unique: true })
-CategorySchema.index({ parentId: 1 });
 CategorySchema.index({ isActive: 1 });
 CategorySchema.index({ sortOrder: 1 });
 CategorySchema.index({ isFeatured: 1 });
@@ -50,9 +48,7 @@ CategorySchema.index({ isDeleted: 1 });
 // Text index for search
 CategorySchema.index({
     name: 'text',
-    nameAr: 'text',
     description: 'text',
-    descriptionAr: 'text',
 });
 
 

@@ -11,11 +11,14 @@ import {
     Request,
     HttpCode,
     HttpStatus,
+    UploadedFiles,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
     CreateProductDto,
+    CreateProductFormDataDto,
     UpdateProductDto,
+    UpdateProductFormDataDto,
     ProductQueryDto,
     UpdateStockDto,
     UpdatePriceDto,
@@ -23,10 +26,32 @@ import {
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
+import { FilesService } from 'src/files/files.service';
+import { ProductImagesUpload } from 'src/common/decorators';
 
 @Controller('products')
 export class ProductsController {
-    constructor(private readonly productsService: ProductsService) { }
+    constructor(
+        private readonly productsService: ProductsService,
+        private readonly filesService: FilesService,
+    ) { }
+
+    // Helper method to parse JSON fields from form data
+    private parseJsonField(value: string | any, defaultValue: any): any {
+        if (!value) return defaultValue;
+        if (typeof value !== 'string') return value;
+        try {
+            return JSON.parse(value);
+        } catch {
+            // If it's a comma-separated string, split it
+            if (Array.isArray(defaultValue)) {
+                return value.split(',').map(item => item.trim());
+            }
+            return defaultValue;
+        }
+    }
+
+
 
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
@@ -42,6 +67,60 @@ export class ProductsController {
         return {
             success: true,
             message: 'تم إنشاء المنتج بنجاح',
+            data: product,
+        };
+    }
+
+    @Post('with-images')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @ProductImagesUpload()
+    async createWithImages(
+        @Body() createProductDto: CreateProductFormDataDto,
+        @UploadedFiles() files: {
+            mainImage?: Express.Multer.File[];
+            images?: Express.Multer.File[];
+        },
+        @Request() req,
+    ) {
+        // Process uploaded files
+        const fileUrls = this.filesService.processUploadedFiles(files);
+
+        // Transform form data to proper types
+        const productData: CreateProductDto = {
+            name: createProductDto.name,
+            description: createProductDto.description,
+            barcode: createProductDto.barcode,
+            price: createProductDto.price ? parseFloat(createProductDto.price) : 0,
+            costPrice: createProductDto.costPrice ? parseFloat(createProductDto.costPrice) : 0,
+            salePrice: createProductDto.salePrice ? parseFloat(createProductDto.salePrice) : undefined,
+            currency: createProductDto.currency || 'SYP',
+            stockQuantity: createProductDto.stockQuantity ? parseInt(createProductDto.stockQuantity) : 0,
+            minStockLevel: createProductDto.minStockLevel ? parseInt(createProductDto.minStockLevel) : 5,
+            categoryId: createProductDto.categoryId,
+            subCategoryId: createProductDto.subCategoryId,
+            branches: this.parseJsonField(createProductDto.branches, []),
+            brand: createProductDto.brand,
+            specifications: this.parseJsonField(createProductDto.specifications, {}),
+            status: createProductDto.status as any || 'active',
+            isActive: String(createProductDto.isActive) === 'true',
+            isFeatured: String(createProductDto.isFeatured) === 'true',
+            isOnSale: String(createProductDto.isOnSale) === 'true',
+            tags: this.parseJsonField(createProductDto.tags, []),
+            keywords: this.parseJsonField(createProductDto.keywords, []),
+            sortOrder: createProductDto.sortOrder ? parseInt(createProductDto.sortOrder) : 0,
+            mainImage: fileUrls.mainImage,
+            images: fileUrls.images,
+        };
+
+        const product = await this.productsService.create(
+            productData,
+            req.user.sub,
+        );
+
+        return {
+            success: true,
+            message: 'تم إنشاء المنتج مع الصور بنجاح',
             data: product,
         };
     }
@@ -135,6 +214,90 @@ export class ProductsController {
         return {
             success: true,
             message: 'تم تحديث المنتج بنجاح',
+            data: product,
+        };
+    }
+
+    @Patch(':id/with-images')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @ProductImagesUpload()
+    async updateWithImages(
+        @Param('id') id: string,
+        @Body() updateProductDto: UpdateProductFormDataDto,
+        @UploadedFiles() files: {
+            mainImage?: Express.Multer.File[];
+            images?: Express.Multer.File[];
+        },
+        @Request() req,
+    ) {
+        // Process uploaded files
+        const fileUrls = this.filesService.processUploadedFiles(files);
+
+        // Transform form data to proper types (only include provided fields)
+        const productData: Partial<UpdateProductDto> = {};
+
+        if (updateProductDto.name) productData.name = updateProductDto.name;
+        if (updateProductDto.description !== undefined) productData.description = updateProductDto.description;
+        if (updateProductDto.barcode !== undefined) productData.barcode = updateProductDto.barcode;
+        if (updateProductDto.price) productData.price = parseFloat(updateProductDto.price);
+        if (updateProductDto.costPrice) productData.costPrice = parseFloat(updateProductDto.costPrice);
+        if (updateProductDto.salePrice) productData.salePrice = parseFloat(updateProductDto.salePrice);
+        if (updateProductDto.currency) productData.currency = updateProductDto.currency;
+        if (updateProductDto.stockQuantity) productData.stockQuantity = parseInt(updateProductDto.stockQuantity);
+        if (updateProductDto.minStockLevel) productData.minStockLevel = parseInt(updateProductDto.minStockLevel);
+        if (updateProductDto.categoryId) productData.categoryId = updateProductDto.categoryId;
+        if (updateProductDto.subCategoryId) productData.subCategoryId = updateProductDto.subCategoryId;
+        if (updateProductDto.branches) {
+            productData.branches = this.parseJsonField(updateProductDto.branches, []);
+        }
+        if (updateProductDto.brand !== undefined) productData.brand = updateProductDto.brand;
+        if (updateProductDto.specifications) {
+            productData.specifications = this.parseJsonField(updateProductDto.specifications, {});
+        }
+        if (updateProductDto.status) productData.status = updateProductDto.status as any;
+        if (updateProductDto.isActive !== undefined) {
+            if (typeof updateProductDto.isActive === 'string') {
+                productData.isActive = updateProductDto.isActive === 'true';
+            } else {
+                productData.isActive = Boolean(updateProductDto.isActive);
+            }
+        }
+        if (updateProductDto.isFeatured !== undefined) {
+            if (typeof updateProductDto.isFeatured === 'string') {
+                productData.isFeatured = updateProductDto.isFeatured === 'true';
+            } else {
+                productData.isFeatured = Boolean(updateProductDto.isFeatured);
+            }
+        }
+        if (updateProductDto.isOnSale !== undefined) {
+            if (typeof updateProductDto.isOnSale === 'string') {
+                productData.isOnSale = updateProductDto.isOnSale === 'true';
+            } else {
+                productData.isOnSale = Boolean(updateProductDto.isOnSale);
+            }
+        }
+        if (updateProductDto.tags) {
+            productData.tags = this.parseJsonField(updateProductDto.tags, []);
+        }
+        if (updateProductDto.keywords) {
+            productData.keywords = this.parseJsonField(updateProductDto.keywords, []);
+        }
+        if (updateProductDto.sortOrder) productData.sortOrder = parseInt(updateProductDto.sortOrder);
+
+        // Add file URLs if files were uploaded
+        if (fileUrls.mainImage) productData.mainImage = fileUrls.mainImage;
+        if (fileUrls.images) productData.images = fileUrls.images;
+
+        const product = await this.productsService.update(
+            id,
+            productData,
+            req.user.sub,
+        );
+
+        return {
+            success: true,
+            message: 'تم تحديث المنتج مع الصور بنجاح',
             data: product,
         };
     }
