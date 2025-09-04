@@ -13,6 +13,7 @@ import {
     Min,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CoordinatesDto {
     @IsNumber()
@@ -38,15 +39,9 @@ export class AddressDto {
     @MaxLength(100)
     city: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(100)
-    state?: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(20)
-    zipCode?: string;
+
+
 
     @IsOptional()
     @IsString()
@@ -114,26 +109,15 @@ export class CreateBranchDto {
     @MaxLength(100)
     name: string;
 
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    nameAr: string;
+
 
     @IsOptional()
     @IsString()
     @MaxLength(500)
     description?: string;
 
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    descriptionAr?: string;
 
-    @IsOptional()
-    @IsString()
-    @MinLength(3)
-    @MaxLength(10)
-    code?: string;
+
 
     @IsOptional()
     @IsString()
@@ -143,9 +127,6 @@ export class CreateBranchDto {
     @IsEmail()
     email?: string;
 
-    @IsOptional()
-    @IsUrl()
-    website?: string;
 
     @ValidateNested()
     @Type(() => AddressDto)
@@ -175,74 +156,7 @@ export class CreateBranchDto {
 }
 
 // Update Branch DTO
-export class UpdateBranchDto {
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    name?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(2)
-    @MaxLength(100)
-    nameAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    description?: string;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(500)
-    descriptionAr?: string;
-
-    @IsOptional()
-    @IsString()
-    @MinLength(3)
-    @MaxLength(10)
-    code?: string;
-
-    @IsOptional()
-    @IsString()
-    phone?: string;
-
-    @IsOptional()
-    @IsEmail()
-    email?: string;
-
-    @IsOptional()
-    @IsUrl()
-    website?: string;
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => AddressDto)
-    address?: AddressDto;
-
-    @IsOptional()
-    @IsMongoId()
-    managerId?: string;
-
-    @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
-
-    @IsOptional()
-    @IsBoolean()
-    isMainBranch?: boolean;
-
-    @IsOptional()
-    @ValidateNested()
-    @Type(() => OperatingHoursDto)
-    operatingHours?: OperatingHoursDto;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    sortOrder?: number;
-}
+export class UpdateBranchDto extends PartialType(CreateBranchDto) { }
 
 // Branch Query DTO
 export class BranchQueryDto {

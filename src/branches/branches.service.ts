@@ -24,15 +24,8 @@ export class BranchesService {
 
     // Create new branch
     async create(createBranchDto: CreateBranchDto, userId: string): Promise<Branch> {
-        const { code, managerId, isMainBranch } = createBranchDto;
+        const { managerId, isMainBranch } = createBranchDto;
 
-        // Check if code already exists
-        if (code) {
-            const existingBranch = await this.branchModel.findOne({ code }).exec();
-            if (existingBranch) {
-                throw new ConflictException('Branch with this code already exists');
-            }
-        }
 
         // Validate manager if provided
         if (managerId) {
@@ -199,17 +192,7 @@ export class BranchesService {
 
     // Update branch
     async update(id: string, updateBranchDto: UpdateBranchDto, userId: string): Promise<Branch> {
-        const { code, managerId, isMainBranch } = updateBranchDto;
-
-        // Check if code is being changed and if it's already taken
-        if (code) {
-            const existingBranch = await this.branchModel
-                .findOne({ code, _id: { $ne: id } })
-                .exec();
-            if (existingBranch) {
-                throw new ConflictException('Code already taken by another branch');
-            }
-        }
+        const { managerId, isMainBranch } = updateBranchDto;
 
         // Validate manager if being changed
         if (managerId) {

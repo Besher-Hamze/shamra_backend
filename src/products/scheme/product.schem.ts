@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { Document, Types } from 'mongoose';
 import { ProductStatus } from 'src/common/enums';
+import { Category } from 'src/categories/scheme/category.scheme';
+import { SubCategory } from 'src/sub-categories/scheme/sub-category.scheme';
 
 export type ProductDocument = Product & Document;
 
@@ -99,13 +101,16 @@ export class Product {
 
     @Prop({ type: Types.ObjectId, ref: 'User' })
     updatedBy: Types.ObjectId;
+
+    // Virtual fields (populated data)
+    category?: Category;
+    subCategory?: SubCategory;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
 
 // Indexes
 ProductSchema.index({ name: 1 });
-// sku and slug indexes are already created by @Prop({ unique: true })
 ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ subCategoryId: 1 });
@@ -162,6 +167,22 @@ ProductSchema.virtual('stockStatus').get(function () {
     if (this.stockQuantity <= 0) return 'out_of_stock';
     if (this.stockQuantity <= this.minStockLevel) return 'low_stock';
     return 'in_stock';
+});
+
+// Virtual for populated category
+ProductSchema.virtual('category', {
+    ref: 'Category',
+    localField: 'categoryId',
+    foreignField: '_id',
+    justOne: true
+});
+
+// Virtual for populated subcategory
+ProductSchema.virtual('subCategory', {
+    ref: 'SubCategory',
+    localField: 'subCategoryId',
+    foreignField: '_id',
+    justOne: true
 });
 
 // Pre-save middleware

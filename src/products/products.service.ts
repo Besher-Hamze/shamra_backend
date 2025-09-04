@@ -117,8 +117,6 @@ export class ProductsService {
         if (search) {
             filter.$or = [
                 { name: { $regex: search, $options: 'i' } },
-                { nameAr: { $regex: search, $options: 'i' } },
-                { sku: { $regex: search, $options: 'i' } },
                 { brand: { $regex: search, $options: 'i' } },
                 { tags: { $in: [new RegExp(search, 'i')] } },
             ];
@@ -135,11 +133,8 @@ export class ProductsService {
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('subCategoryId', 'name nameAr')
-            // .populate('additionalCategories', 'name nameAr slug')
-            // .populate('createdBy', 'firstName lastName')
-            // .populate('branchId', 'name nameAr')
+            .populate('category', 'name  image isActive')
+            .populate('subCategory', 'name  categoryId isActive')
             .exec();
 
         return {
@@ -159,12 +154,9 @@ export class ProductsService {
     async findById(id: string): Promise<Product> {
         const product = await this.productModel
             .findById(id)
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('subCategoryId', 'name nameAr')
-            // .populate('additionalCategories', 'name nameAr slug')
-            // .populate('createdBy', 'firstName lastName')
-            // .populate('updatedBy', 'firstName lastName')
-            // .populate('branchId', 'name nameAr')
+            .populate('category', 'name  description  image isActive isFeatured')
+            .populate('subCategory', 'name  categoryId isActive')
+            .populate('branches')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -234,7 +226,6 @@ export class ProductsService {
                 },
                 { new: true }
             )
-            // .populate('branchId', 'name nameAr')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -252,7 +243,7 @@ export class ProductsService {
                 { ...updatePriceDto, updatedBy: userId },
                 { new: true }
             )
-            // .populate('branchId', 'name nameAr')
+            // .populate('branchId', 'name ')
             .exec();
 
         if (!product || product.isDeleted) {
@@ -317,8 +308,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ sortOrder: 1, createdAt: -1 })
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
+            .populate('category', 'name  image isActive')
+            .populate('subCategory', 'name  isActive')
             .exec();
 
         return products;
@@ -334,8 +325,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ createdAt: -1 })
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
+            .populate('category', 'name  image isActive')
+            .populate('subCategory', 'name  isActive')
             .exec();
 
         return products;
@@ -351,8 +342,8 @@ export class ProductsService {
             })
             .limit(limit)
             .sort({ stockQuantity: 1 })
-            // .populate('categoryId', 'name nameAr slug')
-            // .populate('branchId', 'name nameAr')
+            .populate('category', 'name image isActive')
+            .populate('subCategory', 'name  isActive')
             .exec();
 
         return products;
@@ -392,7 +383,7 @@ export class ProductsService {
             .find({ isDeleted: { $ne: true } })
             .sort({ totalSales: -1 })
             .limit(5)
-            .select('name nameAr sku totalSales')
+            .select('name  totalSales')
             .exec();
 
         // Most viewed products
@@ -400,7 +391,7 @@ export class ProductsService {
             .find({ isDeleted: { $ne: true } })
             .sort({ viewCount: -1 })
             .limit(5)
-            .select('name nameAr sku viewCount')
+            .select('name  viewCount')
             .exec();
 
         return {

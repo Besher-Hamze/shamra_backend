@@ -9,17 +9,10 @@ export class Branch {
     @Prop({ required: true, trim: true })
     name: string;
 
-    @Prop({ required: true, trim: true })
-    nameAr: string;
 
     @Prop({ trim: true })
     description: string;
 
-    @Prop({ trim: true })
-    descriptionAr: string;
-
-    @Prop({ required: true, unique: true })
-    code: string; // Branch code (e.g., BR001, BR002)
 
     @Prop({ trim: true })
     phone: string;
@@ -27,16 +20,13 @@ export class Branch {
     @Prop({ trim: true })
     email: string;
 
-    @Prop({ trim: true })
-    website: string;
+
 
     // Address Information
     @Prop({
         type: {
             street: { type: String, trim: true },
             city: { type: String, trim: true },
-            state: { type: String, trim: true },
-            zipCode: { type: String, trim: true },
             country: { type: String, trim: true, default: 'Syria' },
             coordinates: {
                 lat: { type: Number },
@@ -48,8 +38,6 @@ export class Branch {
     address: {
         street: string;
         city: string;
-        state?: string;
-        zipCode?: string;
         country?: string;
         coordinates?: {
             lat: number;
@@ -139,7 +127,7 @@ BranchSchema.virtual('fullAddress').get(function () {
     const addr = this.address;
     if (!addr) return '';
 
-    const parts = [addr.street, addr.city, addr.state, addr.country].filter(Boolean);
+    const parts = [addr.street, addr.city, addr.country].filter(Boolean);
     return parts.join(', ');
 });
 
@@ -150,15 +138,6 @@ BranchSchema.virtual('currentStatus').get(function () {
     return 'active';
 });
 
-// Pre-save middleware
-BranchSchema.pre('save', function (next) {
-    // Generate code if not provided
-    if (!this.code) {
-        this.code = `BR${Date.now().toString().slice(-6)}`;
-    }
-
-    next();
-});
 
 // Ensure virtual fields are serialised
 BranchSchema.set('toJSON', { virtuals: true });
