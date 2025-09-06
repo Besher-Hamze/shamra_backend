@@ -22,9 +22,6 @@ export class OrderItemDto {
     @IsString()
     productName: string;
 
-    @IsString()
-    productSku: string;
-
     @IsNumber()
     @Min(1)
     quantity: number;
@@ -36,11 +33,7 @@ export class OrderItemDto {
 
 // Create Order DTO
 export class CreateOrderDto {
-    @IsOptional()
-    @IsString()
-    @MinLength(6)
-    @MaxLength(20)
-    orderNumber?: string;
+
 
     @IsMongoId()
     customerId: string;

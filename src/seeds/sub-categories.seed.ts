@@ -34,25 +34,25 @@ export class SubCategoriesSeedService {
                 {
                     name: 'iPhone',
                     nameAr: 'آيفون',
-                    categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    categoryId: categories.find(c => c.name === 'Smartphones')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'LG',
                     nameAr: 'إل جي',
-                    categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    categoryId: categories.find(c => c.name === 'Smartphones')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Samsung',
                     nameAr: 'سامسونج',
-                    categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    categoryId: categories.find(c => c.name === 'Smartphones')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Android Phones',
                     nameAr: 'هواتف أندرويد',
-                    categoryId: categories.find(c => c.name === 'Smartphones')?._id,
+                    categoryId: categories.find(c => c.name === 'Smartphones')?._id.toString(),
                     isActive: true,
                 },
 
@@ -60,19 +60,19 @@ export class SubCategoriesSeedService {
                 {
                     name: 'MacBooks',
                     nameAr: 'ماك بوك',
-                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id,
+                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Windows Laptops',
                     nameAr: 'لابتوب ويندوز',
-                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id,
+                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Desktop PCs',
                     nameAr: 'حواسيب مكتبية',
-                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id,
+                    categoryId: categories.find(c => c.name === 'Computers & Laptops')?._id.toString(),
                     isActive: true,
                 },
 
@@ -80,25 +80,25 @@ export class SubCategoriesSeedService {
                 {
                     name: 'PlayStation',
                     nameAr: 'بلاي ستيشن',
-                    categoryId: categories.find(c => c.name === 'Gaming')?._id,
+                    categoryId: categories.find(c => c.name === 'Gaming')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Xbox',
                     nameAr: 'إكس بوكس',
-                    categoryId: categories.find(c => c.name === 'Gaming')?._id,
+                    categoryId: categories.find(c => c.name === 'Gaming')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Nintendo',
                     nameAr: 'نينتندو',
-                    categoryId: categories.find(c => c.name === 'Gaming')?._id,
+                    categoryId: categories.find(c => c.name === 'Gaming')?._id.toString(),
                     isActive: true,
                 },
                 {
                     name: 'Canon',
                     nameAr: 'كانون',
-                    categoryId: categories.find(c => c.name === 'Cameras & Photography')?._id,
+                    categoryId: categories.find(c => c.name === 'Cameras & Photography')?._id.toString(),
                     isActive: true,
                 },
 

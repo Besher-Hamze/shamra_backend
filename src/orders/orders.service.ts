@@ -41,7 +41,7 @@ export class OrdersService {
         for (const item of items) {
             const product = await this.productModel.findById(item.productId).exec();
             if (!product || product.isDeleted || !product.isActive) {
-                throw new NotFoundException(`Product ${item.productSku} not found or inactive`);
+                throw new NotFoundException(`Product ${item.productName} not found or inactive`);
             }
 
             // Check stock
@@ -58,11 +58,16 @@ export class OrdersService {
             });
             subtotal += total;
         }
+        const timestamp = Date.now().toString().slice(-8);
+        const orderNumber = `ORD${timestamp}`;
+
 
         const order = new this.orderModel({
             ...createOrderDto,
+            orderNumber,
             items: orderItems,
             subtotal,
+            totalAmount: subtotal,
             createdBy: userId,
             updatedBy: userId,
         });

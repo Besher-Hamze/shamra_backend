@@ -28,6 +28,7 @@ import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { FilesService } from 'src/files/files.service';
 import { ProductImagesUpload } from 'src/common/decorators';
+import { parseJsonField } from 'src/common/helpers';
 
 @Controller('products')
 export class ProductsController {
@@ -37,19 +38,7 @@ export class ProductsController {
     ) { }
 
     // Helper method to parse JSON fields from form data
-    private parseJsonField(value: string | any, defaultValue: any): any {
-        if (!value) return defaultValue;
-        if (typeof value !== 'string') return value;
-        try {
-            return JSON.parse(value);
-        } catch {
-            // If it's a comma-separated string, split it
-            if (Array.isArray(defaultValue)) {
-                return value.split(',').map(item => item.trim());
-            }
-            return defaultValue;
-        }
-    }
+
 
 
 
@@ -86,12 +75,13 @@ export class ProductsController {
         // Process uploaded files
         const fileUrls = this.filesService.processUploadedFiles(files);
 
+
         // Transform form data to proper types
         const productData: CreateProductDto = {
             name: createProductDto.name,
             description: createProductDto.description,
             barcode: createProductDto.barcode,
-            price: createProductDto.price ? parseFloat(createProductDto.price) : 0,
+            price: createProductDto.price ? parseFloat(createProductDto.price.toString()) : 0,
             costPrice: createProductDto.costPrice ? parseFloat(createProductDto.costPrice) : 0,
             salePrice: createProductDto.salePrice ? parseFloat(createProductDto.salePrice) : undefined,
             currency: createProductDto.currency || 'SYP',
@@ -99,15 +89,15 @@ export class ProductsController {
             minStockLevel: createProductDto.minStockLevel ? parseInt(createProductDto.minStockLevel) : 5,
             categoryId: createProductDto.categoryId,
             subCategoryId: createProductDto.subCategoryId,
-            branches: this.parseJsonField(createProductDto.branches, []),
+            branches: parseJsonField(createProductDto.branches, []),
             brand: createProductDto.brand,
-            specifications: this.parseJsonField(createProductDto.specifications, {}),
+            specifications: parseJsonField(createProductDto.specifications, {}),
             status: createProductDto.status as any || 'active',
             isActive: String(createProductDto.isActive) === 'true',
             isFeatured: String(createProductDto.isFeatured) === 'true',
             isOnSale: String(createProductDto.isOnSale) === 'true',
-            tags: this.parseJsonField(createProductDto.tags, []),
-            keywords: this.parseJsonField(createProductDto.keywords, []),
+            tags: parseJsonField(createProductDto.tags, []),
+            keywords: parseJsonField(createProductDto.keywords, []),
             sortOrder: createProductDto.sortOrder ? parseInt(createProductDto.sortOrder) : 0,
             mainImage: fileUrls.mainImage,
             images: fileUrls.images,
@@ -249,11 +239,11 @@ export class ProductsController {
         if (updateProductDto.categoryId) productData.categoryId = updateProductDto.categoryId;
         if (updateProductDto.subCategoryId) productData.subCategoryId = updateProductDto.subCategoryId;
         if (updateProductDto.branches) {
-            productData.branches = this.parseJsonField(updateProductDto.branches, []);
+            productData.branches = parseJsonField(updateProductDto.branches, []);
         }
         if (updateProductDto.brand !== undefined) productData.brand = updateProductDto.brand;
         if (updateProductDto.specifications) {
-            productData.specifications = this.parseJsonField(updateProductDto.specifications, {});
+            productData.specifications = parseJsonField(updateProductDto.specifications, {});
         }
         if (updateProductDto.status) productData.status = updateProductDto.status as any;
         if (updateProductDto.isActive !== undefined) {
@@ -278,10 +268,10 @@ export class ProductsController {
             }
         }
         if (updateProductDto.tags) {
-            productData.tags = this.parseJsonField(updateProductDto.tags, []);
+            productData.tags = parseJsonField(updateProductDto.tags, []);
         }
         if (updateProductDto.keywords) {
-            productData.keywords = this.parseJsonField(updateProductDto.keywords, []);
+            productData.keywords = parseJsonField(updateProductDto.keywords, []);
         }
         if (updateProductDto.sortOrder) productData.sortOrder = parseInt(updateProductDto.sortOrder);
 

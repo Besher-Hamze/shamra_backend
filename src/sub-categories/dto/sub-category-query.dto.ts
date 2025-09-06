@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsMongoId, IsBoolean } from 'class-validator';
+import { IsOptional, IsString, IsMongoId, IsBoolean, IsEnum } from 'class-validator';
+import { SubCategoryType } from 'src/common/enums';
 
 export class SubCategoryQueryDto {
     @IsOptional()
@@ -8,6 +9,10 @@ export class SubCategoryQueryDto {
     @IsOptional()
     @IsMongoId()
     categoryId?: string;
+
+    @IsOptional()
+    @IsEnum(SubCategoryType)
+    type?: SubCategoryType;
 
     @IsOptional()
     @IsBoolean()

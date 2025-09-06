@@ -5,6 +5,7 @@ import { SubCategory, SubCategoryDocument } from './scheme/sub-category.scheme';
 import { CreateSubCategoryDto } from './dto/create-sub-category.dto';
 import { UpdateSubCategoryDto } from './dto/update-sub-category.dto';
 import { SubCategoryQueryDto } from './dto/sub-category-query.dto';
+import { parseJsonField } from 'src/common/helpers';
 
 @Injectable()
 export class SubCategoriesService {
@@ -13,6 +14,7 @@ export class SubCategoriesService {
     ) { }
 
     async create(createSubCategoryDto: CreateSubCategoryDto): Promise<SubCategory> {
+        createSubCategoryDto.customFields = parseJsonField(createSubCategoryDto.customFields, []);
         const subCategory = new this.subCategoryModel(createSubCategoryDto);
         return await subCategory.save();
     }
@@ -28,6 +30,10 @@ export class SubCategoriesService {
             filter.categoryId = query.categoryId;
         }
 
+        if (query.type) {
+            filter.type = query.type;
+        }
+
         if (query.isActive !== undefined) {
             filter.isActive = query.isActive;
         }
@@ -35,7 +41,6 @@ export class SubCategoriesService {
         if (query.search) {
             filter.$or = [
                 { name: { $regex: query.search, $options: 'i' } },
-                { nameAr: { $regex: query.search, $options: 'i' } },
             ];
         }
 
@@ -57,9 +62,8 @@ export class SubCategoriesService {
     }
 
     async findByCategory(categoryId: string): Promise<SubCategory[]> {
-        const objectId = new Types.ObjectId(categoryId);
         return await this.subCategoryModel
-            .find({ categoryId: objectId, isActive: true, isDeleted: false })
+            .find({ categoryId, isActive: true, isDeleted: false })
             .exec();
     }
 

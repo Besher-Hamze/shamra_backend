@@ -11,9 +11,6 @@ export class OrderItem {
     @Prop({ required: true })
     productName: string;
 
-    @Prop({ required: true })
-    productSku: string;
-
     @Prop({ required: true, min: 1 })
     quantity: number;
 

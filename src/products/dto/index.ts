@@ -157,11 +157,14 @@ export class CreateProductFormDataDto {
     @IsOptional()
     barcode?: string;
 
+    @IsString()
     price: string;
 
+    @IsString()
     costPrice: string;
 
     @IsOptional()
+    @IsString()
     salePrice?: string;
 
     @IsOptional()
@@ -169,15 +172,19 @@ export class CreateProductFormDataDto {
     currency?: string = 'SYP';
 
     @IsOptional()
+    @IsString()
     stockQuantity?: string = '0';
 
     @IsOptional()
+    @IsString()
     minStockLevel?: string = '5';
 
     @IsOptional()
+    @IsString()
     categoryId: string;
 
     @IsOptional()
+    @IsString()
     subCategoryId: string;
 
     @IsOptional()
@@ -238,6 +245,10 @@ export class ProductQueryDto {
     @IsOptional()
     @IsMongoId()
     categoryId?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    branchId?: string;
 
     @IsOptional()
     @IsMongoId()

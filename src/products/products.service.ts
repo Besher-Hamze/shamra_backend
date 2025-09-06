@@ -17,6 +17,7 @@ import { Product, ProductDocument } from './scheme/product.schem';
 import { Category, CategoryDocument } from 'src/categories/scheme/category.scheme';
 import { SubCategory, SubCategoryDocument } from 'src/sub-categories/scheme/sub-category.scheme';
 import { Branch, BranchDocument } from 'src/branches/scheme/branche.scheme';
+import { SubCategoryType } from 'src/common/enums';
 
 @Injectable()
 export class ProductsService {
@@ -38,14 +39,30 @@ export class ProductsService {
         }
 
         // Validate subcategory if provided
+        let subCategory;
         if (subCategoryId) {
-            const subCategory = await this.subCategoryModel.findById(subCategoryId).exec();
+            subCategory = await this.subCategoryModel.findById(subCategoryId).exec();
             if (!subCategory || subCategory.isDeleted || !subCategory.isActive) {
                 throw new NotFoundException('SubCategory not found or inactive');
             }
             // Ensure subcategory belongs to the specified category
             if (subCategory.categoryId.toString() !== categoryId) {
                 throw new BadRequestException('SubCategory does not belong to the specified category');
+            }
+
+            // Validate specifications based on subcategory type
+            if (subCategory.type === SubCategoryType.CUSTOM_ATTR) {
+                // If subcategory has custom attributes, validate specifications
+                if (createProductDto.specifications && subCategory.customFields.length > 0) {
+                    const specKeys = Object.keys(createProductDto.specifications);
+                    const invalidKeys = specKeys.filter(key => !subCategory.customFields.includes(key));
+                    if (invalidKeys.length > 0) {
+                        throw new BadRequestException(`Invalid specification fields: ${invalidKeys.join(', ')}. Allowed fields: ${subCategory.customFields.join(', ')}`);
+                    }
+                }
+            } else if (subCategory.type === SubCategoryType.FREE_ATTR) {
+                // For free attributes, set specifications to empty object
+                createProductDto.specifications = {};
             }
         }
 
@@ -88,6 +105,7 @@ export class ProductsService {
             maxPrice,
             search,
             tags,
+            branchId,
         } = query;
 
         // Build filter
@@ -100,7 +118,7 @@ export class ProductsService {
         if (isActive !== undefined) filter.isActive = isActive;
         if (isFeatured !== undefined) filter.isFeatured = isFeatured;
         if (isOnSale !== undefined) filter.isOnSale = isOnSale;
-
+        if (branchId) filter.branches = branchId;
         // Price range filter
         if (minPrice !== undefined || maxPrice !== undefined) {
             filter.price = {};
@@ -112,6 +130,12 @@ export class ProductsService {
         if (tags && tags.length > 0) {
             filter.tags = { $in: tags };
         }
+
+        // Branch filter
+        if (branchId) {
+            // contain the branchId
+            filter.branches = { $in: [branchId] };
+        };
 
         // Search filter
         if (search) {
@@ -134,7 +158,7 @@ export class ProductsService {
             .skip(skip)
             .limit(limit)
             .populate('category', 'name  image isActive')
-            .populate('subCategory', 'name  categoryId isActive')
+            .populate('subCategory', 'name categoryId type customFields isActive')
             .exec();
 
         return {
@@ -155,7 +179,7 @@ export class ProductsService {
         const product = await this.productModel
             .findById(id)
             .populate('category', 'name  description  image isActive isFeatured')
-            .populate('subCategory', 'name  categoryId isActive')
+            .populate('subCategory', 'name categoryId type customFields isActive')
             .populate('branches')
             .exec();
 
@@ -309,7 +333,7 @@ export class ProductsService {
             .limit(limit)
             .sort({ sortOrder: 1, createdAt: -1 })
             .populate('category', 'name  image isActive')
-            .populate('subCategory', 'name  isActive')
+            .populate('subCategory', 'name type customFields isActive')
             .exec();
 
         return products;
@@ -326,7 +350,7 @@ export class ProductsService {
             .limit(limit)
             .sort({ createdAt: -1 })
             .populate('category', 'name  image isActive')
-            .populate('subCategory', 'name  isActive')
+            .populate('subCategory', 'name type customFields isActive')
             .exec();
 
         return products;
@@ -343,7 +367,7 @@ export class ProductsService {
             .limit(limit)
             .sort({ stockQuantity: 1 })
             .populate('category', 'name image isActive')
-            .populate('subCategory', 'name  isActive')
+            .populate('subCategory', 'name type customFields isActive')
             .exec();
 
         return products;

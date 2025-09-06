@@ -25,6 +25,12 @@ export enum ProductStatus {
     DISCONTINUED = 'discontinued',
 }
 
+// SubCategory Types
+export enum SubCategoryType {
+    FREE_ATTR = 'free_attr',
+    CUSTOM_ATTR = 'custom_attr',
+}
+
 // Inventory Transaction Types
 export enum InventoryTransactionType {
     PURCHASE = 'purchase',

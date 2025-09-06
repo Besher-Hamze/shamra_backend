@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { SubCategoryType } from 'src/common/enums';
 
 export type SubCategoryDocument = SubCategory & Document;
 
@@ -16,6 +17,12 @@ export class SubCategory {
     @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
     categoryId: Types.ObjectId; // Parent category
 
+    @Prop({ type: String, enum: SubCategoryType, default: SubCategoryType.FREE_ATTR })
+    type: SubCategoryType;
+
+    @Prop({ type: [String], default: [] })
+    customFields: string[]; // Custom field names when type is CUSTOM_ATTR
+
     @Prop({ default: true })
     isActive: boolean;
 
@@ -28,6 +35,7 @@ export const SubCategorySchema = SchemaFactory.createForClass(SubCategory);
 // Basic indexes
 SubCategorySchema.index({ name: 1 });
 SubCategorySchema.index({ categoryId: 1 });
+SubCategorySchema.index({ type: 1 });
 SubCategorySchema.index({ isActive: 1 });
 SubCategorySchema.index({ isDeleted: 1 });
 
