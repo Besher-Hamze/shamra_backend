@@ -42,15 +42,15 @@ export class MainSeedService implements OnModuleInit {
             results.users = await this.usersSeedService.seed();
 
             // 3. Seed Categories
-            // console.log('\n🏷️  Step 3: Seeding Product Categories');
+            console.log('\n🏷️  Step 3: Seeding Product Categories');
             // results.categories = await this.categoriesSeedService.seed();
 
             // // 4. Seed Sub-Categories (depends on categories)
-            // console.log('\n🔗 Step 4: Seeding Sub-Categories');
+            console.log('\n🔗 Step 4: Seeding Sub-Categories');
             // results.subCategories = await this.subCategoriesSeedService.seed();
 
             // 5. Seed Products (depends on categories and sub-categories)
-            // console.log('\n📱 Step 5: Seeding Products');
+            console.log('\n📱 Step 5: Seeding Products');
             // results.products = await this.productsSeedService.seed();
 
             console.log('\n==========================================');

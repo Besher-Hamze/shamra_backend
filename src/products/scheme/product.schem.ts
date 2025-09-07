@@ -27,6 +27,9 @@ export class Product {
     @Prop({ required: true })
     costPrice: number;
 
+    @Prop({ required: true })
+    wholeSalePrice: number;
+
     @Prop()
     salePrice: number; // Price when on sale
 

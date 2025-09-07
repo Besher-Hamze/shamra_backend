@@ -83,6 +83,7 @@ export class ProductsController {
             barcode: createProductDto.barcode,
             price: createProductDto.price ? parseFloat(createProductDto.price.toString()) : 0,
             costPrice: createProductDto.costPrice ? parseFloat(createProductDto.costPrice) : 0,
+            wholeSalePrice: createProductDto.wholeSalePrice ? parseFloat(createProductDto.wholeSalePrice) : 0,
             salePrice: createProductDto.salePrice ? parseFloat(createProductDto.salePrice) : undefined,
             currency: createProductDto.currency || 'SYP',
             stockQuantity: createProductDto.stockQuantity ? parseInt(createProductDto.stockQuantity) : 0,
@@ -232,6 +233,7 @@ export class ProductsController {
         if (updateProductDto.barcode !== undefined) productData.barcode = updateProductDto.barcode;
         if (updateProductDto.price) productData.price = parseFloat(updateProductDto.price);
         if (updateProductDto.costPrice) productData.costPrice = parseFloat(updateProductDto.costPrice);
+        if (updateProductDto.wholeSalePrice) productData.wholeSalePrice = parseFloat(updateProductDto.wholeSalePrice);
         if (updateProductDto.salePrice) productData.salePrice = parseFloat(updateProductDto.salePrice);
         if (updateProductDto.currency) productData.currency = updateProductDto.currency;
         if (updateProductDto.stockQuantity) productData.stockQuantity = parseInt(updateProductDto.stockQuantity);

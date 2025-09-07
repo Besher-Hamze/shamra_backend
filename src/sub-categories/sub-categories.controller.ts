@@ -35,7 +35,7 @@ export class SubCategoriesController {
     }
 
     @Get()
-    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
+    // @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
     findAll(@Query() query: SubCategoryQueryDto) {
         return this.subCategoriesService.findAll(query);
     }

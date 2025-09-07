@@ -16,23 +16,6 @@ import { Type, Transform } from 'class-transformer';
 import { ProductStatus } from 'src/common/enums';
 import { PartialType } from '@nestjs/mapped-types';
 
-// Dimensions DTO
-export class DimensionsDto {
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    length?: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    width?: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    height?: number;
-}
 
 // Create Product DTO
 export class CreateProductDto {
@@ -58,6 +41,10 @@ export class CreateProductDto {
     @IsNumber()
     @Min(0)
     costPrice: number;
+
+    @IsNumber()
+    @Min(0)
+    wholeSalePrice: number;
 
     @IsOptional()
     @IsNumber()
@@ -162,6 +149,9 @@ export class CreateProductFormDataDto {
 
     @IsString()
     costPrice: string;
+
+    @IsString()
+    wholeSalePrice: string;
 
     @IsOptional()
     @IsString()
@@ -322,6 +312,11 @@ export class UpdatePriceDto {
     @IsNumber()
     @Min(0)
     salePrice?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    wholeSalePrice?: number;
 
     @IsOptional()
     @IsBoolean()
