@@ -13,7 +13,7 @@ import {
 } from './dto';
 import { Order, OrderDocument } from './schemes/order.scheme';
 import { Customer, CustomerDocument } from 'src/customers/scheme/customer.scheme';
-import { Product, ProductDocument } from 'src/products/scheme/product.schem';
+import { Product, ProductDocument, ProductDocumentWithMethods } from 'src/products/scheme/product.schem';
 import { OrderStatus } from 'src/common/enums';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class OrdersService {
 
     // Create new order
     async create(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
-        const { customerId, items } = createOrderDto;
+        const { customerId, items, branchId } = createOrderDto;
 
         // Verify customer exists
         const customer = await this.customerModel.findById(customerId).exec();
@@ -39,15 +39,15 @@ export class OrdersService {
         let subtotal = 0;
 
         for (const item of items) {
-            const product = await this.productModel.findById(item.productId).exec();
+            const product = await this.productModel.findById(item.productId).exec() as any;
             if (!product || product.isDeleted || !product.isActive) {
                 throw new NotFoundException(`Product ${item.productName} not found or inactive`);
             }
 
             // Check stock
-            if (product.stockQuantity < item.quantity) {
+            if (product.getBranchStockQuantity(branchId) < item.quantity) {
                 throw new BadRequestException(
-                    `Insufficient stock for ${product.name}. Available: ${product.stockQuantity}, Requested: ${item.quantity}`
+                    `Insufficient stock for ${product.name}. Available: ${product.getBranchStockQuantity(branchId)}, Requested: ${item.quantity}`
                 );
             }
 

@@ -180,7 +180,7 @@ export class ProductsService {
             .findById(id)
             .populate('category', 'name  description  image isActive isFeatured')
             .populate('subCategory', 'name categoryId type customFields isActive')
-            .populate('branches')
+            .populate('branchDetails')
             .exec();
 
         if (!product || product.isDeleted) {

@@ -77,26 +77,34 @@ export class ProductsController {
 
 
         // Transform form data to proper types
+        const branchPricingData = parseJsonField(createProductDto.branchPricing, []);
+
+        // Transform branch pricing data to proper types
+        const transformedBranchPricing = branchPricingData.map((item: any) => ({
+            branchId: item.branchId,
+            price: parseFloat(item.price),
+            costPrice: parseFloat(item.costPrice),
+            wholeSalePrice: parseFloat(item.wholeSalePrice),
+            salePrice: item.salePrice ? parseFloat(item.salePrice) : undefined,
+            currency: item.currency || 'SYP',
+            stockQuantity: parseFloat(item.stockQuantity),
+            isOnSale: item.isOnSale === 'true' || item.isOnSale === true,
+            isActive: item.isActive === 'true' || item.isActive === true,
+        }));
+
         const productData: CreateProductDto = {
             name: createProductDto.name,
             description: createProductDto.description,
             barcode: createProductDto.barcode,
-            price: createProductDto.price ? parseFloat(createProductDto.price.toString()) : 0,
-            costPrice: createProductDto.costPrice ? parseFloat(createProductDto.costPrice) : 0,
-            wholeSalePrice: createProductDto.wholeSalePrice ? parseFloat(createProductDto.wholeSalePrice) : 0,
-            salePrice: createProductDto.salePrice ? parseFloat(createProductDto.salePrice) : undefined,
-            currency: createProductDto.currency || 'SYP',
-            stockQuantity: createProductDto.stockQuantity ? parseInt(createProductDto.stockQuantity) : 0,
-            minStockLevel: createProductDto.minStockLevel ? parseInt(createProductDto.minStockLevel) : 5,
             categoryId: createProductDto.categoryId,
             subCategoryId: createProductDto.subCategoryId,
+            branchPricing: transformedBranchPricing,
             branches: parseJsonField(createProductDto.branches, []),
             brand: createProductDto.brand,
             specifications: parseJsonField(createProductDto.specifications, {}),
             status: createProductDto.status as any || 'active',
             isActive: String(createProductDto.isActive) === 'true',
             isFeatured: String(createProductDto.isFeatured) === 'true',
-            isOnSale: String(createProductDto.isOnSale) === 'true',
             tags: parseJsonField(createProductDto.tags, []),
             keywords: parseJsonField(createProductDto.keywords, []),
             sortOrder: createProductDto.sortOrder ? parseInt(createProductDto.sortOrder) : 0,
@@ -231,17 +239,13 @@ export class ProductsController {
         if (updateProductDto.name) productData.name = updateProductDto.name;
         if (updateProductDto.description !== undefined) productData.description = updateProductDto.description;
         if (updateProductDto.barcode !== undefined) productData.barcode = updateProductDto.barcode;
-        if (updateProductDto.price) productData.price = parseFloat(updateProductDto.price);
-        if (updateProductDto.costPrice) productData.costPrice = parseFloat(updateProductDto.costPrice);
-        if (updateProductDto.wholeSalePrice) productData.wholeSalePrice = parseFloat(updateProductDto.wholeSalePrice);
-        if (updateProductDto.salePrice) productData.salePrice = parseFloat(updateProductDto.salePrice);
-        if (updateProductDto.currency) productData.currency = updateProductDto.currency;
-        if (updateProductDto.stockQuantity) productData.stockQuantity = parseInt(updateProductDto.stockQuantity);
-        if (updateProductDto.minStockLevel) productData.minStockLevel = parseInt(updateProductDto.minStockLevel);
         if (updateProductDto.categoryId) productData.categoryId = updateProductDto.categoryId;
         if (updateProductDto.subCategoryId) productData.subCategoryId = updateProductDto.subCategoryId;
         if (updateProductDto.branches) {
             productData.branches = parseJsonField(updateProductDto.branches, []);
+        }
+        if (updateProductDto.branchPricing) {
+            productData.branchPricing = parseJsonField(updateProductDto.branchPricing, []);
         }
         if (updateProductDto.brand !== undefined) productData.brand = updateProductDto.brand;
         if (updateProductDto.specifications) {
@@ -262,13 +266,7 @@ export class ProductsController {
                 productData.isFeatured = Boolean(updateProductDto.isFeatured);
             }
         }
-        if (updateProductDto.isOnSale !== undefined) {
-            if (typeof updateProductDto.isOnSale === 'string') {
-                productData.isOnSale = updateProductDto.isOnSale === 'true';
-            } else {
-                productData.isOnSale = Boolean(updateProductDto.isOnSale);
-            }
-        }
+
         if (updateProductDto.tags) {
             productData.tags = parseJsonField(updateProductDto.tags, []);
         }

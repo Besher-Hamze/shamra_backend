@@ -15,6 +15,7 @@ import {
 import { Type, Transform } from 'class-transformer';
 import { ProductStatus } from 'src/common/enums';
 import { PartialType } from '@nestjs/mapped-types';
+import { BranchPricingDto, UpdateBranchPricingDto, BranchPricingFormDataDto } from './branch-pricing.dto';
 
 
 // Create Product DTO
@@ -34,32 +35,6 @@ export class CreateProductDto {
     @IsString()
     barcode?: string;
 
-    @IsNumber()
-    @Min(0)
-    price: number;
-
-    @IsNumber()
-    @Min(0)
-    costPrice: number;
-
-    @IsNumber()
-    @Min(0)
-    wholeSalePrice: number;
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    salePrice?: number;
-
-    @IsOptional()
-    @IsString()
-    @MaxLength(3)
-    currency?: string = 'SYP';
-
-    @IsOptional()
-    @IsNumber()
-    @Min(0)
-    stockQuantity?: number = 0;
 
     @IsOptional()
     @IsNumber()
@@ -75,7 +50,12 @@ export class CreateProductDto {
     @IsMongoId({ each: true })
     branches?: string[];
 
-
+    // Branch-specific pricing and stock information
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => BranchPricingDto)
+    branchPricing?: BranchPricingDto[];
 
     @IsMongoId()
     subCategoryId?: string;
@@ -111,10 +91,6 @@ export class CreateProductDto {
     isFeatured?: boolean = false;
 
     @IsOptional()
-    @IsBoolean()
-    isOnSale?: boolean = false;
-
-    @IsOptional()
     @IsArray()
     @IsString({ each: true })
     tags?: string[];
@@ -144,26 +120,6 @@ export class CreateProductFormDataDto {
     @IsOptional()
     barcode?: string;
 
-    @IsString()
-    price: string;
-
-    @IsString()
-    costPrice: string;
-
-    @IsString()
-    wholeSalePrice: string;
-
-    @IsOptional()
-    @IsString()
-    salePrice?: string;
-
-    @IsOptional()
-    @MaxLength(3)
-    currency?: string = 'SYP';
-
-    @IsOptional()
-    @IsString()
-    stockQuantity?: string = '0';
 
     @IsOptional()
     @IsString()
@@ -179,6 +135,10 @@ export class CreateProductFormDataDto {
 
     @IsOptional()
     branches?: string;
+
+    @IsOptional()
+    @IsString()
+    branchPricing?: string; // JSON string for branch pricing
 
     @IsOptional()
     @MaxLength(100)
@@ -197,8 +157,6 @@ export class CreateProductFormDataDto {
     @IsOptional()
     isFeatured?: string = 'false';
 
-    @IsOptional()
-    isOnSale?: string = 'false';
 
     @IsOptional()
     tags?: string;
@@ -239,6 +197,11 @@ export class ProductQueryDto {
     @IsOptional()
     @IsMongoId()
     branchId?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+    includeBranchPricing?: boolean = false;
 
     @IsOptional()
     @IsMongoId()
@@ -321,4 +284,129 @@ export class UpdatePriceDto {
     @IsOptional()
     @IsBoolean()
     isOnSale?: boolean;
+}
+
+// Branch Pricing Management DTOs
+
+// Add branch to product DTO
+export class AddBranchToProductDto {
+    @IsMongoId()
+    branchId: string;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => UpdateBranchPricingDto)
+    pricing?: UpdateBranchPricingDto;
+}
+
+// Update branch pricing DTO
+export class UpdateProductBranchPricingDto {
+    @IsMongoId()
+    branchId: string;
+
+    @ValidateNested()
+    @Type(() => UpdateBranchPricingDto)
+    pricing: UpdateBranchPricingDto;
+}
+
+// Remove branch from product DTO
+export class RemoveBranchFromProductDto {
+    @IsMongoId()
+    branchId: string;
+}
+
+// Get branch pricing DTO
+export class GetBranchPricingDto {
+    @IsMongoId()
+    branchId: string;
+}
+
+// Bulk update branch pricing DTO
+export class BulkUpdateBranchPricingDto {
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => UpdateProductBranchPricingDto)
+    updates: UpdateProductBranchPricingDto[];
+}
+
+// Branch stock update DTO
+export class UpdateBranchStockDto {
+    @IsMongoId()
+    branchId: string;
+
+    @IsNumber()
+    @Min(0)
+    stockQuantity: number;
+
+    @IsOptional()
+    @IsString()
+    reason?: string;
+}
+
+// Branch price update DTO
+export class UpdateBranchPriceDto {
+    @IsMongoId()
+    branchId: string;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    price?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    costPrice?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    wholeSalePrice?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    salePrice?: number;
+
+    @IsOptional()
+    @IsString()
+    currency?: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isOnSale?: boolean;
+}
+
+// Branch-specific product query DTO
+export class BranchProductQueryDto extends ProductQueryDto {
+    @IsMongoId()
+    branchId: string;
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+    includeInactiveBranches?: boolean = false;
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+    includeOutOfStock?: boolean = true;
+}
+
+// Branch stock levels query DTO
+export class BranchStockLevelsDto {
+    @IsOptional()
+    @IsArray()
+    @IsMongoId({ each: true })
+    branchIds?: string[];
+
+    @IsOptional()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+    includeInactive?: boolean = false;
+
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    minStockLevel?: number;
 }
