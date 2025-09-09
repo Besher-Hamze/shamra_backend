@@ -51,10 +51,12 @@ export class SubCategoriesController {
     }
 
     @Patch(':id')
+    @SubCategoryImagesUpload()
     update(@Param('id') id: string, @Body() updateSubCategoryDto: UpdateSubCategoryDto, @UploadedFiles() files: { image?: Express.Multer.File[] }) {
         if (files.image && files.image[0]) {
             updateSubCategoryDto.image = `/uploads/sub-categories/${files.image[0].filename}`;
         }
+
         return this.subCategoriesService.update(id, updateSubCategoryDto);
     }
 

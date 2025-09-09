@@ -39,8 +39,6 @@ export class Product {
     @Prop({ required: true, default: 0 })
     stockQuantity: number;
 
-    @Prop({ default: 5 })
-    minStockLevel: number; // Alert when stock is low
 
     @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
     categoryId: Types.ObjectId;
@@ -56,7 +54,6 @@ export class Product {
 
     @Prop({ trim: true })
     brand: string;
-
 
     // list of branches that the product is available in
     @Prop({ type: [{ type: Types.ObjectId, ref: 'Branch' }], default: [] })
@@ -165,12 +162,6 @@ ProductSchema.virtual('discountPercentage').get(function () {
     return 0;
 });
 
-// Virtual for stock status
-ProductSchema.virtual('stockStatus').get(function () {
-    if (this.stockQuantity <= 0) return 'out_of_stock';
-    if (this.stockQuantity <= this.minStockLevel) return 'low_stock';
-    return 'in_stock';
-});
 
 // Virtual for populated category
 ProductSchema.virtual('category', {

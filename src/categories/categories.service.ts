@@ -98,12 +98,9 @@ export class CategoriesService {
     }
 
     // Find category by ID
-    async findById(id: string, withChildren = false): Promise<Category> {
+    async findById(id: string): Promise<Category> {
         let query = this.categoryModel.findById(id).populate('createdBy', 'firstName lastName');
 
-        if (withChildren) {
-            query = query.populate('children', 'name nameAr slug isActive sortOrder');
-        }
 
         const category = await query.exec();
 

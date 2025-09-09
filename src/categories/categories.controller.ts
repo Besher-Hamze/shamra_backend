@@ -87,11 +87,9 @@ export class CategoriesController {
     @Get(':id')
     async findOne(
         @Param('id') id: string,
-        @Query('withChildren') withChildren?: string,
     ) {
         const category = await this.categoriesService.findById(
-            id,
-            withChildren === 'true',
+            id
         );
         return {
             success: true,
@@ -110,7 +108,6 @@ export class CategoriesController {
         @Request() req,
         @UploadedFiles() files: {
             image?: Express.Multer.File[];
-            banner?: Express.Multer.File[];
         },
     ) {
         // Handle uploaded files
@@ -118,6 +115,8 @@ export class CategoriesController {
             const imageFile = files.image[0];
             updateCategoryDto.image = `/uploads/categories/${imageFile.filename}`;
         }
+
+
         const category = await this.categoriesService.update(
             id,
             updateCategoryDto,

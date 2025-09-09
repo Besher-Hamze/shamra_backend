@@ -19,6 +19,6 @@ export class CreateSubCategoryDto {
     customFields?: string[];
 
     @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
+    // @IsBoolean()
+    isActive?: string;
 }

@@ -24,12 +24,12 @@ export class CreateCategoryDto {
     sortOrder?: number;
 
     @IsOptional()
-    @IsBoolean()
-    isActive?: boolean;
+    // @IsBoolean()
+    isActive?: string;
 
     @IsOptional()
-    @IsBoolean()
-    isFeatured?: boolean;
+    // @IsBoolean()
+    isFeatured?: string;
 }
 
 // Update Category DTO
