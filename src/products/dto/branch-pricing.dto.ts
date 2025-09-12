@@ -12,6 +12,11 @@ export class BranchPricingDto {
     price: number;
 
     @IsNotEmpty()
+    @IsString()
+    sku: string;
+
+
+    @IsNotEmpty()
     @IsNumber()
     @Min(0)
     costPrice: number;
@@ -52,6 +57,10 @@ export class BranchPricingFormDataDto {
 
     @IsNotEmpty()
     @IsString()
+    sku: string;
+
+    @IsNotEmpty()
+    @IsString()
     price: string;
 
     @IsNotEmpty()
@@ -86,6 +95,11 @@ export class BranchPricingFormDataDto {
 }
 
 export class UpdateBranchPricingDto {
+    @IsOptional()
+    @IsNumber()
+    @Min(0)
+    sku?: string;
+
     @IsOptional()
     @IsNumber()
     @Min(0)

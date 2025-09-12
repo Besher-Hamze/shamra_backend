@@ -29,6 +29,9 @@ export class BranchPricing {
     @Prop({ required: true, default: 0 })
     stockQuantity: number;
 
+    @Prop({ required: true, unique: true })
+    sku: string;
+
     @Prop({ default: false })
     isOnSale: boolean;
 

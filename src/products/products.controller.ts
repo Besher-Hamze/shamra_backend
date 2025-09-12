@@ -83,6 +83,7 @@ export class ProductsController {
         const transformedBranchPricing = branchPricingData.map((item: any) => ({
             branchId: item.branchId,
             price: parseFloat(item.price),
+            sku: item.sku,
             costPrice: parseFloat(item.costPrice),
             wholeSalePrice: parseFloat(item.wholeSalePrice),
             salePrice: item.salePrice ? parseFloat(item.salePrice) : undefined,
