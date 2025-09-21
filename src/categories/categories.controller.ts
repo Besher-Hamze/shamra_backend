@@ -26,6 +26,7 @@ import { Roles } from 'src/auth/decorators/role.decorator';
 import { CategoryImagesUpload } from 'src/common/decorators';
 
 @Controller('categories')
+// @UseGuards(JwtAuthGuard,RolesGuard)
 export class CategoriesController {
     constructor(private readonly categoriesService: CategoriesService) { }
 

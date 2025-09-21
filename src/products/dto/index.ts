@@ -199,6 +199,10 @@ export class ProductQueryDto {
     branchId?: string;
 
     @IsOptional()
+    @IsMongoId()
+    selectedBranchId?:string;
+
+    @IsOptional()
     @IsBoolean()
     @Transform(({ value }) => value === 'true')
     includeBranchPricing?: boolean = false;

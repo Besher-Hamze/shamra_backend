@@ -51,7 +51,7 @@ export class MainSeedService implements OnModuleInit {
 
             // 5. Seed Products (depends on categories and sub-categories)
             console.log('\n📱 Step 5: Seeding Products');
-            // results.products = await this.productsSeedService.seed();
+            results.products = await this.productsSeedService.seed();
 
             console.log('\n==========================================');
             console.log('🎉 Seeding completed successfully!');

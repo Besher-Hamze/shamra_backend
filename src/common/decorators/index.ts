@@ -17,4 +17,16 @@ export const GetUserId = createParamDecorator(
     },
 );
 
+export const GetSelectedBranchId = createParamDecorator(
+    (data: unknown, ctx: ExecutionContext) => {
+        const request = ctx.switchToHttp().getRequest<Request>();
+        
+        if (!request.user) {
+            throw new UnauthorizedException('User not found');
+        }
+        const user = request.user as JwtPayload;
+        return user.selectedBranchId;
+    },
+);
+
 // Decorator to Get User Role from Request
