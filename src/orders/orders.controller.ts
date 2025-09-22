@@ -23,22 +23,23 @@ import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { GetUserId } from 'src/common/decorators';
+import { User } from 'src/users/scheme/user.scheme';
 
 @Controller('orders')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class OrdersController {
     constructor(private readonly ordersService: OrdersService) { }
 
     @Post()
     @UseGuards(RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
+    @Roles(UserRole.CUSTOMER, UserRole.MERCHANT)
     async create(
         @Body() createOrderDto: CreateOrderDto,
-        @Request() req,
+        @GetUserId() userId: string,
     ) {
         const order = await this.ordersService.create(
             createOrderDto,
-            req.user.sub,
+            userId,
         );
         return {
             success: true,
@@ -62,7 +63,7 @@ export class OrdersController {
 
     @Get('recent')
     @UseGuards(RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE, UserRole.MERCHANT)
     async getRecentOrders(@Query('limit') limit?: string) {
         const orders = await this.ordersService.getRecentOrders(
             limit ? parseInt(limit) : 10,
@@ -163,7 +164,7 @@ export class OrdersController {
     }
     @Get('my')
     @UseGuards(RolesGuard)
-    @Roles(UserRole.CUSTOMER)
+    @Roles(UserRole.CUSTOMER, UserRole.MERCHANT)
     async getMyOrders(@GetUserId() userId: string) {
         const orders = await this.ordersService.getMyOrders(userId);
         return {

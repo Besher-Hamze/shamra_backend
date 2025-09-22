@@ -18,6 +18,7 @@ import {
     UpdateUserDto,
     ChangePasswordDto,
     UserQueryDto,
+    ChangeRoleDto,
 } from './dto';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
@@ -134,6 +135,18 @@ export class UsersController {
         return {
             success: true,
             message: 'تم حذف المستخدم بنجاح',
+        };
+    }
+
+    @Patch(':id/change-role')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async changeRole(@Param('id') id: string, @Body() changeRoleDto: ChangeRoleDto) {
+        const user = await this.usersService.changeRole(id, changeRoleDto.role);
+        return {
+            success: true,
+            message: 'تم تحديث دور المستخدم بنجاح',
+            data: user,
         };
     }
 }

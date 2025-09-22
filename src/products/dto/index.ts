@@ -200,7 +200,7 @@ export class ProductQueryDto {
 
     @IsOptional()
     @IsMongoId()
-    selectedBranchId?:string;
+    selectedBranchId?: any;
 
     @IsOptional()
     @IsBoolean()
@@ -225,14 +225,10 @@ export class ProductQueryDto {
     isActive?: boolean;
 
     @IsOptional()
-    @IsBoolean()
-    @Transform(({ value }) => value === 'true')
-    isFeatured?: boolean;
+    isFeatured?: string;
 
     @IsOptional()
-    @IsBoolean()
-    @Transform(({ value }) => value === 'true')
-    isOnSale?: boolean;
+    isOnSale?: string;
 
     @IsOptional()
     @Type(() => Number)

@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Branch } from 'src/branches/scheme/branche.scheme';
 import { OrderStatus } from 'src/common/enums';
+import { User } from 'src/users/scheme/user.scheme';
 
 // Order Item Schema
 @Schema({ _id: false })
@@ -30,8 +32,8 @@ export class Order {
     @Prop({ required: true, unique: true })
     orderNumber: string;
 
-    @Prop({ type: Types.ObjectId, ref: 'Customer', required: true })
-    customerId: Types.ObjectId;
+    @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+    userId: Types.ObjectId;
 
     @Prop({ type: Types.ObjectId, ref: 'Branch' })
     branchId: Types.ObjectId;
@@ -71,6 +73,11 @@ export class Order {
 
     @Prop({ type: Types.ObjectId, ref: 'User' })
     updatedBy: Types.ObjectId;
+
+
+    branch?: Branch;
+
+    user?: User;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
@@ -91,10 +98,25 @@ OrderSchema.index({ branchId: 1, status: 1 });
 OrderSchema.index({ status: 1, createdAt: -1 });
 
 // Virtual for item count
-OrderSchema.virtual('itemCount').get(function () {
-    return this.items.length;
-});
+// OrderSchema.virtual('itemCount').get(function () {
+//     return this.items.length;
+// });
 
+// Virtual for branch
+OrderSchema.virtual('branch', {
+    ref: 'Branch',
+    localField: 'branchId',
+    foreignField: '_id',
+    justOne: true
+})
+
+// Virtual for user
+OrderSchema.virtual('user', {
+    ref: 'User',
+    localField: 'userId',
+    foreignField: '_id',
+    justOne: true
+})
 // Virtual for total quantity
 OrderSchema.virtual('totalQuantity').get(function () {
     return this.items.reduce((sum, item) => sum + item.quantity, 0);

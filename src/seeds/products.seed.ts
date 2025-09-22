@@ -198,7 +198,7 @@ export class ProductsSeedService {
         const categorySubCategories = subCategories.filter(
             sc => sc.categoryId.toString() === category._id.toString()
         );
-        const subCategory = categorySubCategories.length > 0 
+        const subCategory = categorySubCategories.length > 0
             ? this.getRandomElement(categorySubCategories)
             : this.getRandomElement(subCategories);
 
@@ -208,7 +208,7 @@ export class ProductsSeedService {
         const adjective = Math.random() > 0.3 ? this.getRandomElement(this.adjectives) : '';
         const model = this.generateModelNumber();
         const color = Math.random() > 0.4 ? this.getRandomElement(this.colors) : '';
-        
+
         const nameParts = [adjective, brand, productType, model, color].filter(Boolean);
         const name = nameParts.join(' ');
 
@@ -235,7 +235,7 @@ export class ProductsSeedService {
             categoryId: category._id.toString(),
             subCategoryId: subCategory._id.toString(),
             images: this.generateImageUrls(productType),
-            mainImage: "uploads/products/5ab1de8c-ccd7-4bb9-bb9d-c02e6288c817.jpg",
+            mainImage: "uploads/products/f78d0135-c4a2-49df-8239-f2ccb7495aa9.png",
             brand,
             branches: availableBranches.map(b => b._id),
             status: this.getRandomElement(Object.values(ProductStatus)),
@@ -268,7 +268,7 @@ export class ProductsSeedService {
             () => `Gen${Math.floor(Math.random() * 5) + 1}`,
             () => `V${Math.floor(Math.random() * 10) + 1}`,
         ];
-        
+
         return this.getRandomElement(patterns)();
     }
 
@@ -279,7 +279,7 @@ export class ProductsSeedService {
         if (Math.random() > 0.3) {
             specs.set('color', this.getRandomElement(this.colors));
         }
-        
+
         if (Math.random() > 0.4) {
             specs.set('weight', `${(Math.random() * 5 + 0.1).toFixed(1)}kg`);
         }
@@ -328,7 +328,7 @@ export class ProductsSeedService {
         productIndex: number
     ) {
         const branchPricing = [];
-        
+
         // Randomly select 1-4 branches for this product
         const selectedBranches = this.selectRandomBranches(branches, Math.floor(Math.random() * 4) + 1);
 
@@ -368,11 +368,11 @@ export class ProductsSeedService {
     private generateImageUrls(productType: string): string[] {
         const imageCount = Math.floor(Math.random() * 5) + 1; // 1-5 images
         const images = [];
-        
+
         for (let i = 0; i < imageCount; i++) {
-            images.push("uploads/products/5ab1de8c-ccd7-4bb9-bb9d-c02e6288c817.jpg");
+            images.push("uploads/products/f78d0135-c4a2-49df-8239-f2ccb7495aa9.png");
         }
-        
+
         return images;
     }
 
@@ -437,12 +437,12 @@ export class ProductsSeedService {
     private weightedRandom<T extends { weight: number }>(items: T[]): T {
         const totalWeight = items.reduce((sum, item) => sum + item.weight, 0);
         let random = Math.random() * totalWeight;
-        
+
         for (const item of items) {
             random -= item.weight;
             if (random <= 0) return item;
         }
-        
+
         return items[items.length - 1];
     }
 

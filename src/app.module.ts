@@ -17,6 +17,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { SettingsModule } from './settings/settings.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
     ReportsModule,
     SettingsModule,
     SubCategoriesModule,
+    BannersModule,
     SeedsModule,
   ],
   controllers: [AppController],

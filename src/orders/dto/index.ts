@@ -35,9 +35,6 @@ export class OrderItemDto {
 export class CreateOrderDto {
 
 
-    @IsMongoId()
-    customerId: string;
-
     @IsOptional()
     @IsMongoId()
     branchId?: string;

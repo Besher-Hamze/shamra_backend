@@ -4,6 +4,7 @@ export enum UserRole {
     MANAGER = 'manager',
     EMPLOYEE = 'employee',
     CUSTOMER = 'customer',
+    MERCHANT = 'merchant',
 }
 
 // Order Status

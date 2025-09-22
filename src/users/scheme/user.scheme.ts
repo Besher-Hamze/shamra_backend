@@ -20,7 +20,7 @@ export class User {
     @Prop({ required: true, select: false })
     password: string;
 
-    @Prop({ type: String, enum: UserRole, default: UserRole.EMPLOYEE })
+    @Prop({ type: String, enum: UserRole, default: UserRole.CUSTOMER })
     role: UserRole;
 
     @Prop({ default: true })

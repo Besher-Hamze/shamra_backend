@@ -14,6 +14,7 @@ import {
     UserQueryDto,
 } from './dto';
 import { User, UserDocument } from './scheme/user.scheme';
+import { UserRole } from 'src/common/enums';
 
 @Injectable()
 export class UsersService {
@@ -199,4 +200,9 @@ export class UsersService {
             .findByIdAndUpdate(id, { lastLoginAt: new Date() })
             .exec();
     }
+
+    changeRole(id: string, role: UserRole): Promise<User> {
+        return this.userModel.findByIdAndUpdate(id, { role: role }, { new: true }).exec();
+    }
+
 }

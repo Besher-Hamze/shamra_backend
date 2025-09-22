@@ -30,9 +30,10 @@ import { GetSelectedBranchId, ProductImagesUpload } from 'src/common/decorators'
 import { parseJsonField } from 'src/common/helpers';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { Branch } from 'src/branches/scheme/branche.scheme';
+import { Types } from 'mongoose';
 
 @Controller('products')
-@UseGuards(JwtAuthGuard,RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
     constructor(
         private readonly productsService: ProductsService,
@@ -128,9 +129,9 @@ export class ProductsController {
     }
 
     @Get()
-    async findAll(@Query() query: ProductQueryDto,@GetSelectedBranchId() branchId?:string) {
-        if(branchId){
-            query.selectedBranchId=branchId;
+    async findAll(@Query() query: ProductQueryDto, @GetSelectedBranchId() branchId?: string) {
+        if (branchId) {
+            query.selectedBranchId = new Types.ObjectId(branchId);
         }
         const result = await this.productsService.findAll(query);
         return {
@@ -142,7 +143,7 @@ export class ProductsController {
     }
 
     @Get('featured')
-    async getFeatured(@Query('limit') limit?: string,@GetSelectedBranchId() branchId?:string) {
+    async getFeatured(@Query('limit') limit?: string, @GetSelectedBranchId() branchId?: string) {
         const products = await this.productsService.getFeatured(
             limit ? parseInt(limit) : 10,
         );
@@ -154,9 +155,10 @@ export class ProductsController {
     }
 
     @Get('on-sale')
-    async getOnSale(@Query('limit') limit?: string,@GetSelectedBranchId() branchId?:string) {
+    async getOnSale(@Query('limit') limit?: string, @GetSelectedBranchId() branchId?: string) {
         const products = await this.productsService.getOnSale(
             limit ? parseInt(limit) : 20,
+            branchId,
         );
         return {
             success: true,
@@ -194,7 +196,7 @@ export class ProductsController {
 
 
     @Get(':id')
-    async findOne(@Param('id') id: string,@GetSelectedBranchId() branchId?:string) {
+    async findOne(@Param('id') id: string, @GetSelectedBranchId() branchId?: string) {
         const product = await this.productsService.findById(id);
         return {
             success: true,

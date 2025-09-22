@@ -15,21 +15,22 @@ import { Order, OrderDocument } from './schemes/order.scheme';
 import { Customer, CustomerDocument } from 'src/customers/scheme/customer.scheme';
 import { Product, ProductDocument, ProductDocumentWithMethods } from 'src/products/scheme/product.schem';
 import { OrderStatus } from 'src/common/enums';
+import { User, UserDocument } from 'src/users/scheme/user.scheme';
 
 @Injectable()
 export class OrdersService {
     constructor(
         @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-        @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     ) { }
 
     // Create new order
     async create(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
-        const { customerId, items, branchId } = createOrderDto;
+        const { items, branchId } = createOrderDto;
 
         // Verify customer exists
-        const customer = await this.customerModel.findById(customerId).exec();
+        const customer = await this.userModel.findById(userId).exec();
         if (!customer || customer.isDeleted) {
             throw new NotFoundException('Customer not found');
         }
@@ -68,6 +69,7 @@ export class OrdersService {
             items: orderItems,
             subtotal,
             totalAmount: subtotal,
+            userId,
             createdBy: userId,
             updatedBy: userId,
         });
@@ -87,8 +89,8 @@ export class OrdersService {
         }
 
         // Update customer stats
-        await this.customerModel
-            .findByIdAndUpdate(customerId, {
+        await this.userModel
+            .findByIdAndUpdate(userId, {
                 $inc: {
                     totalOrders: 1,
                     totalSpent: savedOrder.totalAmount
@@ -97,7 +99,7 @@ export class OrdersService {
             })
             .exec();
 
-        return await this.findById(savedOrder._id.toString());
+        return await this.orderModel.findById(savedOrder._id.toString()).lean().exec();
     }
 
     // Find all orders with pagination
@@ -106,7 +108,6 @@ export class OrdersService {
             page = 1,
             limit = 20,
             sort = '-createdAt',
-            customerId,
             branchId,
             status,
             isPaid,
@@ -116,7 +117,6 @@ export class OrdersService {
         // Build filter
         const filter: any = { isDeleted: { $ne: true } };
 
-        if (customerId) filter.customerId = customerId;
         if (branchId) filter.branchId = branchId;
         if (status) filter.status = status;
         if (isPaid !== undefined) filter.isPaid = isPaid;
@@ -139,8 +139,8 @@ export class OrdersService {
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .populate('customerId', 'firstName lastName email customerCode')
-            .populate('branchId', 'name code')
+            .populate('userId', 'firstName lastName email')
+            .populate('branch', 'name code')
             .populate('createdBy', 'firstName lastName')
             .exec();
 
@@ -161,8 +161,8 @@ export class OrdersService {
     async findById(id: string): Promise<Order> {
         const order = await this.orderModel
             .findById(id)
-            .populate('customerId', 'firstName lastName email customerCode address')
-            .populate('branchId', 'name code address')
+            .populate('user', 'firstName lastName email customerCode address')
+            .populate('branch', 'name code address')
             .populate('createdBy', 'firstName lastName')
             .populate('updatedBy', 'firstName lastName')
             .exec();
@@ -178,8 +178,8 @@ export class OrdersService {
     async findByOrderNumber(orderNumber: string): Promise<Order> {
         const order = await this.orderModel
             .findOne({ orderNumber, isDeleted: { $ne: true } })
-            .populate('customerId', 'firstName lastName email customerCode')
-            .populate('branchId', 'name code')
+            .populate('user', 'firstName lastName email customerCode')
+            .populate('branch', 'name code')
             .exec();
 
         if (!order) {
@@ -207,8 +207,8 @@ export class OrdersService {
                 { ...updateOrderDto, updatedBy: userId },
                 { new: true }
             )
-            .populate('customerId', 'firstName lastName email')
-            .populate('branchId', 'name code')
+            .populate('user', 'firstName lastName email')
+            .populate('branch', 'name code')
             .exec();
 
         return updatedOrder;
@@ -244,7 +244,8 @@ export class OrdersService {
                 { status: updateStatusDto.status, updatedBy: userId },
                 { new: true }
             )
-            .populate('customerId', 'firstName lastName email')
+            .populate('user', 'firstName lastName email')
+            .populate('branch', 'name code')
             .exec();
 
         return updatedOrder;
@@ -275,8 +276,8 @@ export class OrdersService {
         }
 
         // Update customer stats
-        await this.customerModel
-            .findByIdAndUpdate(order.customerId, {
+        await this.userModel
+            .findByIdAndUpdate(order.userId, {
                 $inc: {
                     totalOrders: -1,
                     totalSpent: -order.totalAmount
@@ -298,7 +299,7 @@ export class OrdersService {
             .find({ isDeleted: { $ne: true } })
             .sort({ createdAt: -1 })
             .limit(limit)
-            .populate('customerId', 'firstName lastName')
+            .populate('user', 'firstName lastName')
             .select('orderNumber totalAmount status createdAt')
             .exec();
 
@@ -367,7 +368,7 @@ export class OrdersService {
     // Get my orders
     async getMyOrders(userId: string) {
         const orders = await this.orderModel
-            .find({ customerId: userId, isDeleted: { $ne: true } })
+            .find({ userId: userId, isDeleted: { $ne: true } })
             .exec();
 
         return orders;

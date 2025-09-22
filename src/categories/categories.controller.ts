@@ -39,7 +39,6 @@ export class CategoriesController {
         @Request() req,
         @UploadedFiles() files: {
             image?: Express.Multer.File[];
-            banner?: Express.Multer.File[];
         },
     ) {
         // Handle uploaded files

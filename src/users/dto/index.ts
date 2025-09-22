@@ -132,3 +132,9 @@ export class UserQueryDto {
     @IsString()
     search?: string;
 }
+
+// Change Role DTO
+export class ChangeRoleDto {
+    @IsEnum(UserRole)
+    role: UserRole;
+}

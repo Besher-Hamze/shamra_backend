@@ -112,7 +112,6 @@ export class ProductsService {
     // Find all products with pagination and filtering
     async findAll(query: ProductQueryDto) {
         try {
-            this.logger.log(`Finding products with query: ${JSON.stringify(query)}`);
             const {
                 page = 1,
                 limit = 20,
@@ -129,6 +128,7 @@ export class ProductsService {
                 search,
                 tags,
                 branchId,
+                selectedBranchId,
             } = query;
 
             // Build filter
@@ -140,14 +140,31 @@ export class ProductsService {
             if (status) filter.status = status;
             if (isActive !== undefined) filter.isActive = isActive;
             if (isFeatured !== undefined) filter.isFeatured = isFeatured;
-            if (isOnSale !== undefined) filter.isOnSale = isOnSale;
-            if (branchId) filter.branches = branchId;
 
             // Price range filter
             if (minPrice !== undefined || maxPrice !== undefined) {
-                filter.price = {};
-                if (minPrice !== undefined) filter.price.$gte = minPrice;
-                if (maxPrice !== undefined) filter.price.$lte = maxPrice;
+                if (selectedBranchId) {
+                    filter['branchPricing'] = {
+                        $elemMatch: {
+                            branchId: selectedBranchId,
+                            price: { $gte: minPrice, $lte: maxPrice }
+                        }
+                    };
+                } else {
+                    filter.price = {};
+                    // Fix: search min/max price in any branchPricing.price if no selectedBranchId
+                    if (minPrice !== undefined || maxPrice !== undefined) {
+                        filter['branchPricing'] = filter['branchPricing'] || { $elemMatch: {} };
+                        if (!filter['branchPricing'].$elemMatch) filter['branchPricing'] = { $elemMatch: {} };
+                        if (minPrice !== undefined && maxPrice !== undefined) {
+                            filter['branchPricing'].$elemMatch.price = { $gte: minPrice, $lte: maxPrice };
+                        } else if (minPrice !== undefined) {
+                            filter['branchPricing'].$elemMatch.price = { $gte: minPrice };
+                        } else if (maxPrice !== undefined) {
+                            filter['branchPricing'].$elemMatch.price = { $lte: maxPrice };
+                        }
+                    }
+                }
             }
 
             // Tags filter
@@ -158,6 +175,21 @@ export class ProductsService {
             // Branch filter
             if (branchId) {
                 filter.branches = { $in: [branchId] };
+            }
+            if (selectedBranchId) {
+                filter.branches = { $in: [selectedBranchId] };
+            }
+            if (isOnSale !== undefined) {
+                if (selectedBranchId) {
+                    filter['branchPricing'] = {
+                        $elemMatch: {
+                            branchId: selectedBranchId,
+                            isOnSale: isOnSale
+                        }
+                    };
+                } else {
+                    filter['branchPricing.isOnSale'] = isOnSale;
+                }
             }
 
             // Search filter
@@ -467,16 +499,28 @@ export class ProductsService {
     }
 
     // Get products on sale
-    async getOnSale(limit: number = 20) {
+    async getOnSale(limit: number = 20, branchId?: string) {
         try {
-            this.logger.log(`Getting products on sale with limit: ${limit}`);
+            this.logger.log(`Getting products on sale with limit: ${limit} and branchId: ${branchId}`);
+            const filter: any = {
+                isDeleted: { $ne: true },
+                isActive: true
+            };
+
+            if (branchId) {
+                filter.branches = { $in: [branchId] };
+                filter['branchPricing'] = {
+                    $elemMatch: {
+                        branchId: branchId,
+                        isOnSale: true
+                    }
+                };
+            } else {
+                filter['branchPricing.isOnSale'] = true;
+            }
 
             const products = await this.productModel
-                .find({
-                    isOnSale: true,
-                    isActive: true,
-                    isDeleted: { $ne: true }
-                })
+                .find(filter)
                 .limit(limit)
                 .sort({ createdAt: -1 })
                 .populate('category', 'name  image isActive')
@@ -534,7 +578,10 @@ export class ProductsService {
                 .exec();
 
             const onSaleProducts = await this.productModel
-                .countDocuments({ isOnSale: true, isDeleted: { $ne: true } })
+                .countDocuments({
+                    'branchPricing.isOnSale': true,
+                    isDeleted: { $ne: true }
+                })
                 .exec();
 
             const outOfStockProducts = await this.productModel
