@@ -60,6 +60,7 @@ export class AuthService {
             role: user.role,
             branchId: user.branchId?.toString(),
             selectedBranchId: defaultBranch?._id.toString(),
+            selectedBranchObject: defaultBranch,
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -77,8 +78,10 @@ export class AuthService {
                 lastName: user.lastName,
                 fullName: user.fullName,
                 email: user.email,
+                selectedBranchObject: defaultBranch,
                 role: user.role,
                 branchId: user.branchId?.toString(),
+                selectedBranchId: defaultBranch?._id.toString(),
             },
         };
     }
@@ -98,6 +101,7 @@ export class AuthService {
             role: user.role,
             branchId: user.branchId?.toString(),
             selectedBranchId: selectedBranchId._id.toString(),
+            selectedBranchObject: selectedBranchId,
         };
         const accessToken = this.jwtService.sign(payload);
         const refreshToken = this.jwtService.sign(payload, {
@@ -119,6 +123,7 @@ export class AuthService {
                     role: user.role,
                     branchId: user.branchId?.toString(),
                     selectedBranchId: selectedBranchId._id.toString(),
+                    selectedBranchObject: selectedBranchId,
                 },
             },
         };
@@ -195,6 +200,6 @@ export class AuthService {
 
     // Get current user profile
     async getProfile(userId: string) {
-        return await this.usersService.findById(userId);
+        var user = await this.usersService.findById(userId);
     }
 }

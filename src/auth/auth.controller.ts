@@ -11,7 +11,8 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard, LocalAuthGuard } from './gurads';
 import { LoginDto, RefreshTokenDto, RegisterDto } from './dto';
-import { GetUserId } from 'src/common/decorators';
+import { GetSelectedBranchObject, GetUserId } from 'src/common/decorators';
+import { Branch } from 'src/branches/scheme/branche.scheme';
 
 @Controller('auth')
 export class AuthController {
@@ -60,12 +61,13 @@ export class AuthController {
 
     @Get('profile')
     @UseGuards(JwtAuthGuard)
-    async getProfile(@Request() req) {
-        const user = await this.authService.getProfile(req.user.sub);
+    async getProfile(@GetUserId() userId: string, @GetSelectedBranchObject() selectedBranchObject: Branch) {
+        const user = await this.authService.getProfile(userId);
+
         return {
             success: true,
             message: 'تم جلب الملف الشخصي بنجاح',
-            data: user,
+            data: { user, ...selectedBranchObject },
         };
     }
 

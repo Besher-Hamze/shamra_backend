@@ -18,6 +18,7 @@ import { SeedsModule } from './seeds/seeds.module';
 import { SettingsModule } from './settings/settings.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { BannersModule } from './banners/banners.module';
+import { MerchantsModule } from './merchants/merchants.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { BannersModule } from './banners/banners.module';
     SettingsModule,
     SubCategoriesModule,
     BannersModule,
+    MerchantsModule,
     SeedsModule,
   ],
   controllers: [AppController],

@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { Branch } from 'src/branches/scheme/branche.scheme';
 
 // Base interface for all documents
 export interface BaseDocument extends Document {
@@ -37,6 +38,7 @@ export interface JwtPayload {
     role: string;
     branchId?: string;
     selectedBranchId?: string;
+    selectedBranchObject?: Branch;
     iat?: number;
     exp?: number;
 }

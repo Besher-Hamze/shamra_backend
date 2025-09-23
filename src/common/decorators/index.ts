@@ -17,15 +17,37 @@ export const GetUserId = createParamDecorator(
     },
 );
 
+export const GetUserRole = createParamDecorator(
+    (data: unknown, ctx: ExecutionContext) => {
+        const request = ctx.switchToHttp().getRequest<Request>();
+        if (!request.user) {
+            throw new UnauthorizedException('User not found');
+        }
+        const user = request.user as JwtPayload;
+        return user.role;
+    },
+);
+
 export const GetSelectedBranchId = createParamDecorator(
     (data: unknown, ctx: ExecutionContext) => {
         const request = ctx.switchToHttp().getRequest<Request>();
-        
+
         if (!request.user) {
             throw new UnauthorizedException('User not found');
         }
         const user = request.user as JwtPayload;
         return user.selectedBranchId;
+    },
+);
+
+export const GetSelectedBranchObject = createParamDecorator(
+    (data: unknown, ctx: ExecutionContext) => {
+        const request = ctx.switchToHttp().getRequest<Request>();
+        if (!request.user) {
+            throw new UnauthorizedException('User not found');
+        }
+        const user = request.user as JwtPayload;
+        return user.selectedBranchObject;
     },
 );
 

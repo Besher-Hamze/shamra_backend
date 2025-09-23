@@ -2,6 +2,7 @@ import {
     Injectable,
     NotFoundException,
     BadRequestException,
+    ForbiddenException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -14,7 +15,7 @@ import {
 import { Order, OrderDocument } from './schemes/order.scheme';
 import { Customer, CustomerDocument } from 'src/customers/scheme/customer.scheme';
 import { Product, ProductDocument, ProductDocumentWithMethods } from 'src/products/scheme/product.schem';
-import { OrderStatus } from 'src/common/enums';
+import { OrderStatus, UserRole } from 'src/common/enums';
 import { User, UserDocument } from 'src/users/scheme/user.scheme';
 
 @Injectable()
@@ -215,11 +216,17 @@ export class OrdersService {
     }
 
     // Update order status
-    async updateStatus(id: string, updateStatusDto: UpdateOrderStatusDto, userId: string): Promise<Order> {
+    async updateStatus(id: string, updateStatusDto: UpdateOrderStatusDto, userId: string, userRole: UserRole): Promise<Order> {
         const order = await this.orderModel.findById(id).exec();
         if (!order || order.isDeleted) {
             throw new NotFoundException('Order not found');
         }
+        if ((userRole === UserRole.MERCHANT || userRole === UserRole.CUSTOMER) && order) {
+            if (order.userId.toString() !== userId) {
+                throw new ForbiddenException('You are not authorized to update the order status');
+            }
+        }
+
 
         // Handle status transitions
         if (updateStatusDto.status === OrderStatus.CANCELLED) {

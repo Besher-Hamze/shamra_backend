@@ -22,7 +22,7 @@ import {
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
-import { GetUserId } from 'src/common/decorators';
+import { GetUserId, GetUserRole } from 'src/common/decorators';
 import { User } from 'src/users/scheme/user.scheme';
 
 @Controller('orders')
@@ -101,7 +101,7 @@ export class OrdersController {
 
     @Get('by-id/:id')
     @UseGuards(RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
+    // @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE,)
     async findOne(@Param('id') id: string) {
         const order = await this.ordersService.findById(id);
         return {
@@ -133,16 +133,18 @@ export class OrdersController {
 
     @Patch(':id/status')
     @UseGuards(RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE)
+    // @Roles(UserRole.ADMIN, UserRole.MANAGER, UserRole.EMPLOYEE,UserRole.MERCHANT)
     async updateStatus(
         @Param('id') id: string,
         @Body() updateStatusDto: UpdateOrderStatusDto,
-        @Request() req,
+        @GetUserId() userId: string,
+        @GetUserRole() userRole: UserRole,
     ) {
         const order = await this.ordersService.updateStatus(
             id,
             updateStatusDto,
-            req.user.sub,
+            userId,
+            userRole,
         );
         return {
             success: true,
