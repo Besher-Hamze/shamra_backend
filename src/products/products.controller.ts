@@ -131,7 +131,7 @@ export class ProductsController {
     @Get()
     async findAll(@Query() query: ProductQueryDto, @GetSelectedBranchId() branchId?: string) {
         if (branchId) {
-            query.selectedBranchId = new Types.ObjectId(branchId);
+            query.selectedBranchId = branchId;
         }
         const result = await this.productsService.findAll(query);
         return {
