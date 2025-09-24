@@ -47,6 +47,7 @@ export const GetSelectedBranchObject = createParamDecorator(
             throw new UnauthorizedException('User not found');
         }
         const user = request.user as JwtPayload;
+
         return user.selectedBranchObject;
     },
 );

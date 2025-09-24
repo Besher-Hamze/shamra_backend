@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
 import { JwtPayload } from 'src/common/interfaces';
+import { GetSelectedBranchObject } from 'src/common/decorators';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -30,6 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             role: payload.role,
             branchId: payload.branchId,
             selectedBranchId: payload.selectedBranchId,
+            selectedBranchObject: payload.selectedBranchObject
         };
     }
 }

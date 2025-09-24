@@ -100,7 +100,7 @@ export class UsersService {
     async findById(id: string): Promise<User> {
         const user = await this.userModel
             .findById(id)
-            .populate('branchId', 'name')
+            .lean()
             .exec();
 
         if (!user || user.isDeleted) {
