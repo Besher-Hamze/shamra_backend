@@ -200,6 +200,6 @@ export class AuthService {
 
     // Get current user profile
     async getProfile(userId: string) {
-        var user = await this.usersService.findById(userId);
+        return await this.usersService.findById(userId);
     }
 }
