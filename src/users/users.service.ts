@@ -97,18 +97,18 @@ export class UsersService {
     }
 
     // Find user by ID
-    async findById(id: string): Promise<User> {
-        const user = await this.userModel
-            .findById(id)
-            .lean()
-            .exec();
+async findById(id: string): Promise<User> {
+    const user = await this.userModel
+        .findById(id)
+        .populate('branchId') // 🎯 احذف 'name' لجلب كل المعلومات
+        .exec();
 
-        if (!user || user.isDeleted) {
-            throw new NotFoundException('User not found');
-        }
-        
-        return user;
+    if (!user || user.isDeleted) {
+        throw new NotFoundException('User not found');
     }
+    
+    return user;
+}
 
     // Find user by email (for authentication)
     async findByEmail(email: string): Promise<User | null> {
