@@ -67,7 +67,10 @@ export class AuthController {
         return {
             success: true,
             message: 'تم جلب الملف الشخصي بنجاح',
-            data: { user, ...selectedBranchObject },
+            data: {
+                ...user,
+                selectedBranchObject: selectedBranchObject
+            },
         };
     }
 
