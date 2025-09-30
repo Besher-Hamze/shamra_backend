@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 // Login DTO
 export class LoginDto {
@@ -30,6 +30,9 @@ export class RegisterDto {
     @IsString()
     phoneNumber:string;
 
+    @IsOptional()
+    @IsString()
+    fcmToken?:string
     
 }
 

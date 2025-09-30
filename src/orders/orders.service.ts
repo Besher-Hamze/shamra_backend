@@ -15,8 +15,9 @@ import {
 import { Order, OrderDocument } from './schemes/order.scheme';
 import { Customer, CustomerDocument } from 'src/customers/scheme/customer.scheme';
 import { Product, ProductDocument, ProductDocumentWithMethods } from 'src/products/scheme/product.schem';
-import { OrderStatus, UserRole } from 'src/common/enums';
+import { CurrencyEnum, OrderStatus, UserRole } from 'src/common/enums';
 import { User, UserDocument } from 'src/users/scheme/user.scheme';
+import { SettingsService } from 'src/settings/settings.service';
 
 @Injectable()
 export class OrdersService {
@@ -24,19 +25,18 @@ export class OrdersService {
         @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
         @InjectModel(User.name) private userModel: Model<UserDocument>,
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+        private settingsService: SettingsService,
     ) { }
 
     // Create new order
     async create(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
-        const { items, branchId } = createOrderDto;
+        const { items, branchId, pointsToRedeem, currency = CurrencyEnum.USD } = createOrderDto;
 
-        // Verify customer exists
         const customer = await this.userModel.findById(userId).exec();
         if (!customer || customer.isDeleted) {
             throw new NotFoundException('Customer not found');
         }
 
-        // Verify all products exist and calculate totals
         const orderItems = [];
         let subtotal = 0;
 
@@ -46,7 +46,6 @@ export class OrdersService {
                 throw new NotFoundException(`Product ${item.productName} not found or inactive`);
             }
 
-            // Check stock
             if (product.getBranchStockQuantity(branchId) < item.quantity) {
                 throw new BadRequestException(
                     `Insufficient stock for ${product.name}. Available: ${product.getBranchStockQuantity(branchId)}, Requested: ${item.quantity}`
@@ -54,22 +53,48 @@ export class OrdersService {
             }
 
             const total = item.quantity * item.price;
-            orderItems.push({
-                ...item,
-                total,
-            });
+            orderItems.push({ ...item, total });
             subtotal += total;
         }
+
+        let discountAmount = 0;
+        let pointsUsed = 0;
+        let discountPercent = 0;
+
+        if (pointsToRedeem && pointsToRedeem > 0) {
+            if (customer.points < pointsToRedeem) {
+                throw new BadRequestException(
+                    `Insufficient points. Available: ${customer.points}, Requested: ${pointsToRedeem}`
+                );
+            }
+
+            // 🎯 حساب الخصم حسب العملة
+            const discount = await this.calculateDiscountFromPoints(
+                pointsToRedeem,
+                subtotal,
+                currency
+            );
+            discountAmount = discount.discountAmount;
+            discountPercent = discount.discountPercent;
+            pointsUsed = pointsToRedeem;
+
+            console.log(
+                `✅ User used ${pointsUsed} points for ${discountAmount} ${currency} discount`
+            );
+        }
+
         const timestamp = Date.now().toString().slice(-8);
         const orderNumber = `ORD${timestamp}`;
-
+        const totalAmount = subtotal - discountAmount;
 
         const order = new this.orderModel({
             ...createOrderDto,
             orderNumber,
             items: orderItems,
             subtotal,
-            totalAmount: subtotal,
+            discountAmount,
+            totalAmount,
+            currency,
             userId,
             createdBy: userId,
             updatedBy: userId,
@@ -77,7 +102,6 @@ export class OrdersService {
 
         const savedOrder = await order.save();
 
-        // Update product stock
         for (const item of orderItems) {
             await this.productModel
                 .findByIdAndUpdate(item.productId, {
@@ -89,19 +113,24 @@ export class OrdersService {
                 .exec();
         }
 
-        // Update customer stats
-        await this.userModel
-            .findByIdAndUpdate(userId, {
-                $inc: {
-                    totalOrders: 1,
-                    totalSpent: savedOrder.totalAmount
-                },
-                lastOrderDate: new Date(),
-            })
-            .exec();
+        const updateData: any = {
+            $inc: {
+                totalOrders: 1,
+                totalSpent: savedOrder.totalAmount
+            },
+            lastOrderDate: new Date(),
+        };
+
+        if (pointsUsed > 0) {
+            updateData.$inc.points = -pointsUsed;
+            updateData.$inc.totalPointsUsed = pointsUsed;
+        }
+
+        await this.userModel.findByIdAndUpdate(userId, updateData).exec();
 
         return await this.orderModel.findById(savedOrder._id.toString()).lean().exec();
     }
+
 
     // Find all orders with pagination
     async findAll(query: OrderQueryDto) {
@@ -216,21 +245,25 @@ export class OrdersService {
     }
 
     // Update order status
-    async updateStatus(id: string, updateStatusDto: UpdateOrderStatusDto, userId: string, userRole: UserRole): Promise<Order> {
+    async updateStatus(
+        id: string,
+        updateStatusDto: UpdateOrderStatusDto,
+        userId: string,
+        userRole: UserRole
+    ): Promise<Order> {
         const order = await this.orderModel.findById(id).exec();
         if (!order || order.isDeleted) {
             throw new NotFoundException('Order not found');
         }
+
         if ((userRole === UserRole.MERCHANT || userRole === UserRole.CUSTOMER) && order) {
             if (order.userId.toString() !== userId) {
                 throw new ForbiddenException('You are not authorized to update the order status');
             }
         }
 
-
         // Handle status transitions
         if (updateStatusDto.status === OrderStatus.CANCELLED) {
-            // Restore stock when order is cancelled
             if (order.status !== OrderStatus.CANCELLED) {
                 for (const item of order.items) {
                     await this.productModel
@@ -243,6 +276,11 @@ export class OrdersService {
                         .exec();
                 }
             }
+        }
+
+        // 🎯 منح النقاط عند إكمال الطلب
+        if (updateStatusDto.status === OrderStatus.DELIVERED && order.status !== OrderStatus.DELIVERED) {
+            await this.awardPoints(order);
         }
 
         const updatedOrder = await this.orderModel
@@ -379,5 +417,118 @@ export class OrdersService {
             .exec();
 
         return orders;
+    }
+
+
+    private async calculatePointsEarned(amount: number, currency: string): Promise<number> {
+        let pointsEarned = 0;
+
+        switch (currency) {
+            case CurrencyEnum.USD:
+                const rateUSD = await this.settingsService.getValue('points_rate_usd', 10);
+                pointsEarned = Math.floor((amount / 100) * rateUSD);
+                break;
+
+            case CurrencyEnum.SYP:
+                const rateSYP = await this.settingsService.getValue('points_rate_syp', 10);
+                pointsEarned = Math.floor((amount / 100000) * rateSYP);
+                break;
+
+            case CurrencyEnum.TRK:
+                const rateTRY = await this.settingsService.getValue('points_rate_try', 10);
+                pointsEarned = Math.floor((amount / 1000) * rateTRY);
+                break;
+
+            default:
+                pointsEarned = 0;
+        }
+
+        return pointsEarned;
+    }
+
+    // 🎯 دالة منح النقاط عند إكمال الطلب
+    private async awardPoints(order: Order): Promise<void> {
+        try {
+            const pointsEnabled = await this.settingsService.getValue('points_enabled', true);
+            if (!pointsEnabled) return;
+
+            const pointsEarned = await this.calculatePointsEarned(
+                order.totalAmount,
+                order.currency || CurrencyEnum.USD
+            );
+
+            if (pointsEarned > 0) {
+                await this.userModel.findByIdAndUpdate(
+                    order.userId,
+                    {
+                        $inc: {
+                            points: pointsEarned,
+                            totalPointsEarned: pointsEarned
+                        }
+                    }
+                ).exec();
+
+                console.log(
+                    `✅ User earned ${pointsEarned} points from ${order.totalAmount} ${order.currency}`
+                );
+            }
+        } catch (error) {
+            console.error('Error awarding points:', error);
+        }
+    }
+
+    // 🎯 دالة حساب الخصم من النقاط (نسبة مئوية)
+    private async calculateDiscountFromPoints(
+        pointsToRedeem: number,
+        subtotal: number,
+        currency: string
+    ): Promise<{ discountAmount: number; discountPercent: number }> {
+        // الحصول على نسبة الخصم لكل نقطة
+        const discountRate = await this.settingsService.getValue('points_discount_rate', 1);
+
+        // الحد الأقصى للخصم
+        const maxDiscountPercent = await this.settingsService.getValue('points_max_discount_percent', 50);
+
+        // حساب نسبة الخصم المطلوبة
+        let discountPercent = pointsToRedeem * discountRate;
+
+        // التأكد من عدم تجاوز الحد الأقصى
+        if (discountPercent > maxDiscountPercent) {
+            discountPercent = maxDiscountPercent;
+        }
+
+        // 🎯 حساب قيمة الخصم بناءً على العملة
+        let discountAmount = 0;
+
+        switch (currency) {
+            case CurrencyEnum.USD:
+                // الحصول على قيمة النقطة بالدولار (مثال: 1 نقطة = 0.1$)
+                const valuePerPointUSD = await this.settingsService.getValue('points_value_usd', 0.1);
+                discountAmount = pointsToRedeem * valuePerPointUSD;
+                break;
+
+            case CurrencyEnum.SYP:
+                // الحصول على قيمة النقطة بالليرة السورية (مثال: 1 نقطة = 1000 ل.س)
+                const valuePerPointSYP = await this.settingsService.getValue('points_value_syp', 1000);
+                discountAmount = pointsToRedeem * valuePerPointSYP;
+                break;
+
+            case CurrencyEnum.TRK:
+                // الحصول على قيمة النقطة بالليرة التركية (مثال: 1 نقطة = 3 ₺)
+                const valuePerPointTRY = await this.settingsService.getValue('points_value_try', 3);
+                discountAmount = pointsToRedeem * valuePerPointTRY;
+                break;
+
+            default:
+                // Default to percentage-based discount
+                discountAmount = (subtotal * discountPercent) / 100;
+        }
+
+        // التأكد من عدم تجاوز الخصم قيمة الطلب
+        if (discountAmount > subtotal) {
+            discountAmount = subtotal;
+        }
+
+        return { discountAmount, discountPercent };
     }
 }

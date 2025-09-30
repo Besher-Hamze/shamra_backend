@@ -5,6 +5,7 @@ import { OrdersController } from './orders.controller';
 import { Order, OrderSchema } from './schemes/order.scheme';
 import { User, UserSchema } from 'src/users/scheme/user.scheme';
 import { Product, ProductSchema } from 'src/products/scheme/product.schem';
+import { SettingsModule } from 'src/settings/settings.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Product, ProductSchema } from 'src/products/scheme/product.schem';
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
     ]),
+    SettingsModule
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

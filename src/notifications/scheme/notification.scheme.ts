@@ -10,23 +10,16 @@ export class Notification {
     title: string;
 
     @Prop({ required: true, trim: true })
-    titleAr: string;
-
-    @Prop({ required: true, trim: true })
     message: string;
 
-    @Prop({ required: true, trim: true })
-    messageAr: string;
-
-    @Prop({ type: String, enum: NotificationType, required: true })
+    @Prop({ type: String, enum: NotificationType, default:NotificationType.SYSTEM })
     type: NotificationType;
 
     @Prop({ type: Types.ObjectId, ref: 'User', required: true })
     recipientId: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: 'User' })
-    senderId: Types.ObjectId;
-
+    @Prop()
+    fcmToken?:string
     @Prop({ type: Types.ObjectId, ref: 'Branch' })
     branchId: Types.ObjectId;
 

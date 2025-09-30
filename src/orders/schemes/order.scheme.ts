@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { Branch } from 'src/branches/scheme/branche.scheme';
-import { OrderStatus } from 'src/common/enums';
+import { CurrencyEnum, OrderStatus } from 'src/common/enums';
 import { User } from 'src/users/scheme/user.scheme';
 
 // Order Item Schema
@@ -55,6 +55,9 @@ export class Order {
 
     @Prop({ type: String, enum: OrderStatus, default: OrderStatus.PENDING })
     status: OrderStatus;
+
+    @Prop({enum:CurrencyEnum,default:CurrencyEnum.USD})
+    currency:string;
 
     @Prop({ trim: true })
     notes: string;
