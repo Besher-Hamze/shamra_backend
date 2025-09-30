@@ -96,7 +96,7 @@ export class UsersService {
         };
     }
 
-    // Find user by ID
+    // Find user By ID
     async findById(id: string): Promise<User> {
         const user = await this.userModel
             .findById(id)
