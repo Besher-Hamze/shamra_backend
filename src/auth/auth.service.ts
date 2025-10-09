@@ -88,47 +88,57 @@ export class AuthService {
 
 
     // generate a new token when i  select branch 
-    async selectBranch(userId: string, branchId: string) {
-        const user = await this.usersService.findById(userId);
-        if (!user) {
-            throw new NotFoundException('مستخدم غير موجود');
-        }
-        const selectedBranchId = await this.branchesService.findById(branchId);
-        user.branchId = selectedBranchId._id;
-        const payload: JwtPayload = {
-            sub: user._id.toString(),
-            email: user.email,
-            role: user.role,
-            branchId: user.branchId?.toString(),
-            selectedBranchId: selectedBranchId._id.toString(),
-            selectedBranchObject: selectedBranchId,
-        };
-        const accessToken = this.jwtService.sign(payload);
-        const refreshToken = this.jwtService.sign(payload, {
-            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
-        });
-        return {
-            success: true,
-            message: 'تم اختيار الفرع بنجاح',
-            data: {
-                access_token: accessToken,
-                refresh_token: refreshToken,
-                user: {
-                    _id: user._id.toString(),
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    fullName: user.fullName,
-                    email: user.email,
-                    role: user.role,
-                    branchId: user.branchId?.toString(),
-                    selectedBranchId: selectedBranchId._id.toString(),
-                    selectedBranchObject: selectedBranchId,
-                },
-            },
-        };
+  async selectBranch(userId: string, branchId: string) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+        throw new NotFoundException('مستخدم غير موجود');
     }
-
+    
+    const selectedBranchId = await this.branchesService.findById(branchId);
+    
+    // 🎯 حول ObjectId إلى string
+    await this.usersService.update(userId, { 
+        branchId: selectedBranchId._id.toString() 
+    });
+    
+    // اجلب المستخدم المحدث
+    const updatedUser = await this.usersService.findById(userId);
+    
+    const payload: JwtPayload = {
+        sub: updatedUser._id.toString(),
+        email: updatedUser.email,
+        role: updatedUser.role,
+        branchId: updatedUser.branchId?.toString(),
+        selectedBranchId: selectedBranchId._id.toString(),
+        selectedBranchObject: selectedBranchId,
+    };
+    
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+    });
+    
+    return {
+        success: true,
+        message: 'تم اختيار الفرع بنجاح',
+        data: {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            user: {
+                _id: updatedUser._id.toString(),
+                firstName: updatedUser.firstName,
+                lastName: updatedUser.lastName,
+                fullName: updatedUser.fullName,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                branchId: updatedUser.branchId?.toString(),
+                selectedBranchId: selectedBranchId._id.toString(),
+                selectedBranchObject: selectedBranchId,
+            },
+        },
+    };
+}
     // Register new user
     async register(registerDto: RegisterDto) {
         // Check if user already exists

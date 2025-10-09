@@ -12,7 +12,7 @@ import {
     MaxLength,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { OrderStatus } from 'src/common/enums';
+import { CurrencyEnum, OrderStatus } from 'src/common/enums';
 
 // Order Item DTO
 export class OrderItemDto {
@@ -54,6 +54,14 @@ export class CreateOrderDto {
     @Min(0)
     discountAmount?: number = 0;
 
+
+    @IsOptional()
+    pointsToRedeem?: number = 0
+
+    @IsOptional()
+    @IsEnum(CurrencyEnum)
+    currency?: CurrencyEnum
+    
     @IsOptional()
     @IsString()
     @MaxLength(500)

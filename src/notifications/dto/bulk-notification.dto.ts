@@ -35,4 +35,9 @@ export class BulkNotificationDto {
     @IsOptional()
     @IsObject()
     metadata?: Record<string, any>;
+
+    @IsOptional()
+    @IsString()
+    fcmTokens:string[]
+
 }

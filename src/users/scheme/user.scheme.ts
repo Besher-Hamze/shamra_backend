@@ -19,9 +19,19 @@ export class User {
 
     @Prop({ required: true, select: false })
     password: string;
-
+    @Prop()
+    fcmToken: string;
     @Prop({ type: String, enum: UserRole, default: UserRole.CUSTOMER })
     role: UserRole;
+
+    @Prop({ default: 0, min: 0 })
+    points: number; // النقاط المتاحة (موحدة لكل العملات)
+
+    @Prop({ default: 0, min: 0 })
+    totalPointsEarned: number; // إجمالي النقاط المكتسبة
+
+    @Prop({ default: 0, min: 0 })
+    totalPointsUsed: number; // إجمالي النقاط المستخدمة
 
     @Prop({ default: true })
     isActive: boolean;

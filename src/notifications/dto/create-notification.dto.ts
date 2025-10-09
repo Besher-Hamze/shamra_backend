@@ -5,24 +5,14 @@ export class CreateNotificationDto {
     @IsString()
     title: string;
 
-    @IsString()
-    titleAr: string;
+
 
     @IsString()
     message: string;
 
-    @IsString()
-    messageAr: string;
-
+    @IsOptional()
     @IsEnum(NotificationType)
     type: NotificationType;
-
-    @IsMongoId()
-    recipientId: string;
-
-    @IsOptional()
-    @IsMongoId()
-    senderId?: string;
 
     @IsOptional()
     @IsMongoId()
@@ -46,4 +36,8 @@ export class CreateNotificationDto {
     @IsOptional()
     @IsObject()
     metadata?: Record<string, any>;
+
+@IsOptional()
+    @IsString()
+    fcmToken:string
 }

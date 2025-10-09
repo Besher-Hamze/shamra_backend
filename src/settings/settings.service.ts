@@ -118,6 +118,77 @@ export class SettingsService {
                 isPublic: false,
                 isEditable: true,
             },
+            {
+                key: 'points_enabled',
+                value: true,
+                description: 'Enable Points System',
+                descriptionAr: 'تفعيل نظام النقاط',
+                type: 'boolean',
+                category: 'system',
+                isPublic: false,
+                isEditable: true,
+            },
+
+            // 💵 الدولار - كل 100$ = 10 نقاط
+            {
+                key: 'points_rate_usd',
+                value: 10, // 10 نقاط لكل 100 دولار
+                description: 'Points earned per 100 USD',
+                descriptionAr: 'النقاط المكتسبة لكل 100 دولار',
+                type: 'number',
+                category: 'system',
+                isPublic: true,
+                isEditable: true,
+            },
+
+            // 💰 الليرة السورية - كل 100,000 ل.س = 10 نقاط
+            {
+                key: 'points_rate_syp',
+                value: 10, // 10 نقاط لكل 100,000 ليرة سورية
+                description: 'Points earned per 100,000 SYP',
+                descriptionAr: 'النقاط المكتسبة لكل 100,000 ليرة سورية',
+                type: 'number',
+                category: 'system',
+                isPublic: true,
+                isEditable: true,
+            },
+
+            // 🇹🇷 الليرة التركية - كل 1,000 ₺ = 10 نقاط
+            {
+                key: 'points_rate_try',
+                value: 10, // 10 نقاط لكل 1,000 ليرة تركية
+                description: 'Points earned per 1,000 TRY',
+                descriptionAr: 'النقاط المكتسبة لكل 1,000 ليرة تركية',
+                type: 'number',
+                category: 'system',
+                isPublic: true,
+                isEditable: true,
+            },
+
+            // 🎁 قيمة الخصم للنقاط (قابل للتعديل)
+            {
+                key: 'points_discount_rate',
+                value: 1, // 1 نقطة = 1% خصم
+                description: 'Discount percentage per point (1 point = 1%)',
+                descriptionAr: 'نسبة الخصم لكل نقطة (1 نقطة = 1%)',
+                type: 'number',
+                category: 'system',
+                isPublic: true,
+                isEditable: true,
+            },
+
+            // 🛡️ حد أقصى للخصم بالنقاط
+            {
+                key: 'points_max_discount_percent',
+                value: 50, // حد أقصى 50% خصم
+                description: 'Maximum discount percentage using points',
+                descriptionAr: 'الحد الأقصى لنسبة الخصم بالنقاط',
+                type: 'number',
+                category: 'system',
+                isPublic: true,
+                isEditable: true,
+            },
+
         ];
 
         for (const setting of defaultSettings) {

@@ -76,3 +76,10 @@ export enum PaymentStatus {
     REFUNDED = 'refunded',
     PARTIAL = 'partial',
 }
+
+export enum CurrencyEnum{
+    USD="USD",
+    TRK="TRK",
+    SYP="SYP",
+    EUR="EUR"
+}
