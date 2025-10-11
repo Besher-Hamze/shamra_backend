@@ -278,7 +278,7 @@ export class NotificationsService {
 
     return { total, unread };
   }
-  async notifyUserOrderEvent(userId: string, status: OrderStatus, orderId: string) {
+  async notifyUserOrderEvent(userId: string, status: OrderStatus, orderId: string, orderNumber: string) {
     // Get user
     const user = await this.userModel.findById(userId);
     if (!user) {
@@ -310,7 +310,7 @@ export class NotificationsService {
 
     // Compose notification
     const title = "حالة الطلب";
-    const body = `${statusMessage} (طلب رقم: ${orderId})`;
+    const body = `${statusMessage} (طلب رقم: ${orderNumber})`;
 
     // Save notification in the database (optional)
     await this.notificationModel.create({
