@@ -38,6 +38,10 @@ export class RegisterDto {
     @IsString()
     fcmToken?: string
 
+    @IsOptional()
+    @IsString()
+    branchId?: string
+
 }
 
 // Refresh Token DTO

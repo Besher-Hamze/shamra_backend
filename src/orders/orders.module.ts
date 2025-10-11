@@ -6,6 +6,7 @@ import { Order, OrderSchema } from './schemes/order.scheme';
 import { User, UserSchema } from 'src/users/scheme/user.scheme';
 import { Product, ProductSchema } from 'src/products/scheme/product.schem';
 import { SettingsModule } from 'src/settings/settings.module';
+import { NotificationsModule } from 'src/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -14,7 +15,8 @@ import { SettingsModule } from 'src/settings/settings.module';
       { name: User.name, schema: UserSchema },
       { name: Product.name, schema: ProductSchema },
     ]),
-    SettingsModule
+    SettingsModule,
+    NotificationsModule
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

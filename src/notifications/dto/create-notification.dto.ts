@@ -5,8 +5,6 @@ export class CreateNotificationDto {
     @IsString()
     title: string;
 
-
-
     @IsString()
     message: string;
 
@@ -17,6 +15,10 @@ export class CreateNotificationDto {
     @IsOptional()
     @IsMongoId()
     branchId?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    recipientId?: string;
 
     @IsOptional()
     @IsMongoId()

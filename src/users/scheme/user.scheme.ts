@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { Branch } from 'src/branches/scheme/branche.scheme';
 import { UserRole } from 'src/common/enums';
 
 export type UserDocument = User & Document;
@@ -19,8 +20,10 @@ export class User {
 
     @Prop({ required: true, select: false })
     password: string;
+
     @Prop()
     fcmToken: string;
+
     @Prop({ type: String, enum: UserRole, default: UserRole.CUSTOMER })
     role: UserRole;
 
@@ -53,6 +56,8 @@ export class User {
     isDeleted: boolean;
 
     fullName: string;
+
+    branch?: Branch;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
@@ -67,6 +72,12 @@ UserSchema.virtual('fullName').get(function () {
     return `${this.firstName} ${this.lastName}`;
 });
 
+UserSchema.virtual("branch", {
+    justOne: true,
+    localField: "branchId",
+    foreignField: "_id",
+    ref: "Branch"
+});
 // Remove sensitive data when converting to JSON
 UserSchema.methods.toJSON = function () {
     const userObject = this.toObject({ virtuals: true });

@@ -19,7 +19,7 @@ import { Product, ProductDocument } from './scheme/product.schem';
 import { Category, CategoryDocument } from 'src/categories/scheme/category.scheme';
 import { SubCategory, SubCategoryDocument } from 'src/sub-categories/scheme/sub-category.scheme';
 import { Branch, BranchDocument } from 'src/branches/scheme/branche.scheme';
-import { SubCategoryType } from 'src/common/enums';
+import { SubCategoryType, UserRole } from 'src/common/enums';
 
 @Injectable()
 export class ProductsService {
@@ -110,7 +110,7 @@ export class ProductsService {
     }
 
     // Find all products with pagination and filtering
-    async findAll(query: ProductQueryDto) {
+    async findAll(query: ProductQueryDto, userRole?: UserRole) {
         try {
             const {
                 page = 1,
@@ -176,9 +176,9 @@ export class ProductsService {
             if (branchId) {
                 filter.branches = { $in: [branchId] };
             }
-            // if (selectedBranchId) {
-            //     filter.branches = { $in: [selectedBranchId] };
-            // }
+            if (selectedBranchId && userRole != UserRole.ADMIN) {
+                filter.branches = { $in: [selectedBranchId] };
+            }
             if (isOnSale !== undefined) {
                 if (selectedBranchId) {
                     filter['branchPricing'] = {

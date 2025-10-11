@@ -80,7 +80,7 @@ export class UsersService {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .populate('branchId', 'name')
+            .populate('branch', 'name')
             .exec();
 
         return {
@@ -97,18 +97,18 @@ export class UsersService {
     }
 
     // Find user by ID
-async findById(id: string): Promise<User> {
-    const user = await this.userModel
-        .findById(id)
-        .populate('branchId') 
-        .exec();
+    async findById(id: string): Promise<User> {
+        const user = await this.userModel
+            .findById(id)
+            .populate('branch')
+            .exec();
 
-    if (!user || user.isDeleted) {
-        throw new NotFoundException('User not found');
+        if (!user || user.isDeleted) {
+            throw new NotFoundException('User not found');
+        }
+
+        return user;
     }
-    
-    return user;
-}
 
     // Find user by email (for authentication)
     async findByEmail(email: string): Promise<User | null> {
@@ -203,6 +203,10 @@ async findById(id: string): Promise<User> {
 
     changeRole(id: string, role: UserRole): Promise<User> {
         return this.userModel.findByIdAndUpdate(id, { role: role }, { new: true }).exec();
+    }
+
+    changeBranch(id: string, branchId: string): Promise<User> {
+        return this.userModel.findByIdAndUpdate(id, { branchId: branchId }, { new: true }).exec();
     }
 
 }

@@ -142,3 +142,9 @@ export class ChangeRoleDto {
     @IsEnum(UserRole)
     role: UserRole;
 }
+
+// Change Branch DTO
+export class ChangeBranchDto {
+    @IsMongoId()
+    branchId: string;
+}

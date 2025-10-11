@@ -61,7 +61,7 @@ export class CreateOrderDto {
     @IsOptional()
     @IsEnum(CurrencyEnum)
     currency?: CurrencyEnum
-    
+
     @IsOptional()
     @IsString()
     @MaxLength(500)
@@ -136,6 +136,10 @@ export class OrderQueryDto {
     @IsOptional()
     @IsString()
     search?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    categoryId?: string;
 }
 
 // Update Order Status DTO

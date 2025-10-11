@@ -19,6 +19,7 @@ import {
     ChangePasswordDto,
     UserQueryDto,
     ChangeRoleDto,
+    ChangeBranchDto,
 } from './dto';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
@@ -54,49 +55,49 @@ export class UsersController {
         };
     }
 
-@Get('profile/me')
-async getProfile(@Request() req) {
-    const user: any = await this.usersService.findById(req.user.sub);
-    console.log('User Points:', user.points);
-    
-    // 🎯 استخرج branch info
-    let branchIdStr = '';
-    let branchObj = null;
-    
-    if (user.branchId) {
-        if (typeof user.branchId === 'object' && user.branchId._id) {
-            // populated
-            branchIdStr = user.branchId._id.toString();
-            branchObj = user.branchId;
-        } else {
-            // string or ObjectId
-            branchIdStr = user.branchId.toString();
+    @Get('profile/me')
+    async getProfile(@Request() req) {
+        const user: any = await this.usersService.findById(req.user.sub);
+        console.log('User Points:', user.points);
+
+        // 🎯 استخرج branch info
+        let branchIdStr = '';
+        let branchObj = null;
+
+        if (user.branchId) {
+            if (typeof user.branchId === 'object' && user.branchId._id) {
+                // populated
+                branchIdStr = user.branchId._id.toString();
+                branchObj = user.branchId;
+            } else {
+                // string or ObjectId
+                branchIdStr = user.branchId.toString();
+            }
         }
+
+        return {
+            success: true,
+            message: 'تم جلب الملف الشخصي بنجاح',
+            data: {
+                _id: user._id,
+                id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: user.role,
+                isActive: user.isActive,
+                createdAt: user.createdAt,
+                updatedAt: user.updatedAt,
+                points: user.points || 0,
+                totalPointsEarned: user.totalPointsEarned || 0,
+                totalPointsUsed: user.totalPointsUsed || 0,
+                branchId: branchIdStr,
+                selectedBranchId: branchIdStr,
+                selectedBranchObject: branchObj,
+            },
+        };
     }
-    
-    return {
-        success: true,
-        message: 'تم جلب الملف الشخصي بنجاح',
-        data: {
-            _id: user._id,
-            id: user._id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            role: user.role,
-            isActive: user.isActive,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
-            points: user.points || 0,
-            totalPointsEarned: user.totalPointsEarned || 0,
-            totalPointsUsed: user.totalPointsUsed || 0,
-            branchId: branchIdStr,
-            selectedBranchId: branchIdStr,
-            selectedBranchObject: branchObj,
-        },
-    };
-}
 
     @Get(':id')
     @UseGuards(RolesGuard)
@@ -180,6 +181,17 @@ async getProfile(@Request() req) {
         return {
             success: true,
             message: 'تم تحديث دور المستخدم بنجاح',
+            data: user,
+        };
+    }
+    @Patch(':id/change-branch')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async changeBranch(@Param('id') id: string, @Body() changeBranchDto: ChangeBranchDto) {
+        const user = await this.usersService.changeBranch(id, changeBranchDto.branchId);
+        return {
+            success: true,
+            message: 'تم تحديث الفرع المستخدم بنجاح',
             data: user,
         };
     }

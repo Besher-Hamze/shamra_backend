@@ -157,11 +157,15 @@ export class AuthService {
             isActive: true,
         });
 
+        const selectedBranchId = await this.branchesService.findById(registerDto.branchId);
         // Generate tokens
         const payload: JwtPayload = {
             sub: user._id.toString(),
             email: user.email,
             role: user.role,
+            branchId: user.branchId?.toString(),
+            selectedBranchId: user.branchId?.toString(),
+            selectedBranchObject: selectedBranchId,
         };
 
         const accessToken = this.jwtService.sign(payload);

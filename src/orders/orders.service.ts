@@ -18,6 +18,7 @@ import { Product, ProductDocument, ProductDocumentWithMethods } from 'src/produc
 import { CurrencyEnum, OrderStatus, UserRole } from 'src/common/enums';
 import { User, UserDocument } from 'src/users/scheme/user.scheme';
 import { SettingsService } from 'src/settings/settings.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -26,6 +27,7 @@ export class OrdersService {
         @InjectModel(User.name) private userModel: Model<UserDocument>,
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
         private settingsService: SettingsService,
+        private readonly notificationService: NotificationsService,
     ) { }
 
     // Create new order
@@ -127,7 +129,7 @@ export class OrdersService {
         }
 
         await this.userModel.findByIdAndUpdate(userId, updateData).exec();
-
+        await this.notificationService.notifyUserOrderEvent(userId, savedOrder.status, savedOrder._id.toString());
         return await this.orderModel.findById(savedOrder._id.toString()).lean().exec();
     }
 
@@ -142,6 +144,7 @@ export class OrdersService {
             status,
             isPaid,
             search,
+            categoryId
         } = query;
 
         // Build filter
@@ -241,6 +244,8 @@ export class OrdersService {
             .populate('branch', 'name code')
             .exec();
 
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString());
+
         return updatedOrder;
     }
 
@@ -293,6 +298,7 @@ export class OrdersService {
             .populate('branch', 'name code')
             .exec();
 
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString());
         return updatedOrder;
     }
 
@@ -330,12 +336,14 @@ export class OrdersService {
             })
             .exec();
 
-        await this.orderModel
+
+        const updatedOrder = await this.orderModel
             .findByIdAndUpdate(id, {
                 isDeleted: true,
                 updatedBy: userId,
             })
             .exec();
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), OrderStatus.CANCELLED, updatedOrder._id.toString());
     }
 
     // Get recent orders

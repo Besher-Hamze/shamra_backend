@@ -13,6 +13,9 @@ import { MarkReadDto } from './dto/mark-read.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 import * as admin from 'firebase-admin';
+import { UsersService } from 'src/users/users.service';
+import { User, UserDocument } from 'src/users/scheme/user.scheme';
+import { OrderStatus } from 'src/common/enums';
 
 // ✅ Initialize Firebase Admin once
 admin.initializeApp({
@@ -25,6 +28,7 @@ admin.initializeApp({
 export class NotificationsService {
   constructor(
     @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) { }
 
   /**
@@ -67,16 +71,15 @@ export class NotificationsService {
   async create(createNotificationDto: CreateNotificationDto, userId: string): Promise<Notification> {
     const notification = new this.notificationModel({
       ...createNotificationDto,
-      recipientId: userId,
       createdBy: userId,
       updatedBy: userId,
     });
 
     const saved = await notification.save();
-
-    if (createNotificationDto.fcmToken) {
+    const user = await this.userModel.findById(createNotificationDto.recipientId).lean().exec();
+    if (user.fcmToken) {
       await this.sendPushNotification(
-        [createNotificationDto.fcmToken],
+        user.fcmToken,
         createNotificationDto.title,
         createNotificationDto.message,
         { type: createNotificationDto.type ?? 'GENERAL' },
@@ -274,5 +277,59 @@ export class NotificationsService {
     ]);
 
     return { total, unread };
+  }
+  async notifyUserOrderEvent(userId: string, status: OrderStatus, orderId: string) {
+    // Get user
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException("المستخدم غير موجود");
+    }
+    const fcmToken = user.fcmToken;
+
+    // Compose status message in Arabic
+    let statusMessage: string;
+    switch (status) {
+      case OrderStatus.PENDING:
+        statusMessage = "طلبك قيد الانتظار";
+        break;
+      case OrderStatus.CONFIRMED:
+        statusMessage = "تم تأكيد طلبك";
+        break;
+      case OrderStatus.SHIPPED:
+        statusMessage = "تم شحن طلبك";
+        break;
+      case OrderStatus.DELIVERED:
+        statusMessage = "تم توصيل طلبك";
+        break;
+      case OrderStatus.CANCELLED:
+        statusMessage = "تم إلغاء طلبك";
+        break;
+      default:
+        statusMessage = "تم تحديث حالة طلبك";
+    }
+
+    // Compose notification
+    const title = "حالة الطلب";
+    const body = `${statusMessage} (طلب رقم: ${orderId})`;
+
+    // Save notification in the database (optional)
+    await this.notificationModel.create({
+      recipientId: userId,
+      title,
+      body,
+      orderId,
+      status,
+      isRead: false,
+      isDeleted: false,
+      createdBy: userId,
+      createdAt: new Date(),
+      updatedBy: userId,
+      updatedAt: new Date()
+    });
+
+    // Send push notification
+    if (fcmToken) {
+      this.sendPushNotification(fcmToken, title, body, { orderId });
+    }
   }
 }
