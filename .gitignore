@@ -15,7 +15,7 @@ lerna-debug.log*
 uploads/*
 # OS
 .DS_Store
-
+firebase-service-account.json
 # Tests
 /coverage
 /.nyc_output

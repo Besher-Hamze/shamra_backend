@@ -26,7 +26,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 @Controller('notifications')
 @UseGuards(JwtAuthGuard)
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) {}
+  constructor(private readonly notificationsService: NotificationsService) { }
 
   @Post()
   @UseGuards(RolesGuard)
@@ -84,6 +84,18 @@ export class NotificationsController {
   @Get()
   async findAll(@Query() query: NotificationQueryDto, @Request() req) {
     const result = await this.notificationsService.findAll(query, req.user.sub);
+    return {
+      success: true,
+      message: 'تم جلب الإشعارات بنجاح',
+      data: result.data,
+      pagination: result.pagination,
+    };
+  }
+  @Get('admin')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  async findAllForAdmin(@Query() query: NotificationQueryDto) {
+    const result = await this.notificationsService.findAllForAdmin(query);
     return {
       success: true,
       message: 'تم جلب الإشعارات بنجاح',

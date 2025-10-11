@@ -40,7 +40,7 @@ import { MerchantsModule } from './merchants/merchants.module';
     CustomersModule,
     OrdersModule,
     NotificationsModule,
-    // InventoryModule,
+    InventoryModule,
     ReportsModule,
     SettingsModule,
     SubCategoriesModule,

@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import * as XLSX from 'xlsx';
 import { Inventory, InventoryDocument, InventoryTransaction, InventoryTransactionDocument } from './scheme/inventory.scheme';
-import { CreateInventoryDto, UpdateInventoryDto, InventoryQueryDto, StockAdjustmentDto, StockTransferDto, InventoryTransactionQueryDto } from './dto';
+import { CreateInventoryDto, UpdateInventoryDto, InventoryQueryDto, StockAdjustmentDto, StockTransferDto, InventoryTransactionQueryDto, ImportInventoryDto, ImportResultDto, ImportErrorDto, ImportSummaryDto, ExcelRowDataDto } from './dto';
 import { InventoryTransactionType } from 'src/common/enums';
+import { Product, ProductDocument } from 'src/products/scheme/product.schem';
 
 @Injectable()
 export class InventoryService {
     constructor(
         @InjectModel(Inventory.name) private inventoryModel: Model<InventoryDocument>,
         @InjectModel(InventoryTransaction.name) private transactionModel: Model<InventoryTransactionDocument>,
+        @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     ) { }
 
     async create(createInventoryDto: CreateInventoryDto, userId: string): Promise<Inventory> {
@@ -168,6 +171,9 @@ export class InventoryService {
         inventory.updatedBy = new Types.ObjectId(userId);
         await inventory.save();
 
+        // Update product's branch pricing with new quantity and cost
+        await this.updateProductBranchPricing(productId, branchId, inventory.currentStock, unitCost);
+
         // Create transaction record
         await this.createTransaction({
             type,
@@ -227,6 +233,10 @@ export class InventoryService {
         toInventory.updatedBy = new Types.ObjectId(userId);
         await toInventory.save();
 
+        // Update product's branch pricing for both branches
+        await this.updateProductBranchPricing(productId, fromBranchId, fromInventory.currentStock, fromInventory.unitCost);
+        await this.updateProductBranchPricing(productId, toBranchId, toInventory.currentStock, unitCost);
+
         // Create transfer transaction
         await this.createTransaction({
             type: InventoryTransactionType.TRANSFER,
@@ -252,7 +262,12 @@ export class InventoryService {
 
         inventory.reservedStock += quantity;
         inventory.updatedBy = new Types.ObjectId(userId);
-        return await inventory.save();
+        const updatedInventory = await inventory.save();
+
+        // Update product's branch pricing with new available stock
+        await this.updateProductBranchPricing(productId, branchId, inventory.currentStock, inventory.unitCost);
+
+        return updatedInventory;
     }
 
     async releaseReservedStock(productId: string, branchId: string, quantity: number, userId: string): Promise<Inventory> {
@@ -264,7 +279,12 @@ export class InventoryService {
 
         inventory.reservedStock -= quantity;
         inventory.updatedBy = new Types.ObjectId(userId);
-        return await inventory.save();
+        const updatedInventory = await inventory.save();
+
+        // Update product's branch pricing with new available stock
+        await this.updateProductBranchPricing(productId, branchId, inventory.currentStock, inventory.unitCost);
+
+        return updatedInventory;
     }
 
     // Transaction Management
@@ -377,5 +397,311 @@ export class InventoryService {
             .populate('toBranchId', 'name nameAr')
             .populate('createdBy', 'firstName lastName')
             .exec();
+    }
+
+    // Excel Import Methods
+    async importInventoryFromExcel(
+        file: Express.Multer.File,
+        importInventoryDto: ImportInventoryDto,
+        userId: string
+    ): Promise<ImportResultDto> {
+        try {
+            // Read Excel file
+            const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Convert to JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Skip header row and process data
+            const dataRows = jsonData.slice(1);
+
+            const result: ImportResultDto = {
+                success: true,
+                message: 'تم استيراد المخزون بنجاح',
+                totalRows: dataRows.length,
+                processedRows: 0,
+                skippedRows: 0,
+                errors: [],
+                summary: {
+                    productsUpdated: 0,
+                    productsCreated: 0,
+                    productsNotFound: 0,
+                    totalQuantityUpdated: 0,
+                    totalValueUpdated: 0,
+                }
+            };
+
+            // Process each row
+            for (let i = 0; i < dataRows.length; i++) {
+                const row = dataRows[i] as any[];
+                const rowNumber = i + 2; // +2 because we skipped header and arrays are 0-indexed
+
+                try {
+                    // Validate row data
+                    if (!row || row.length < 2) {
+                        result.errors.push({
+                            row: rowNumber,
+                            productCode: '',
+                            error: 'صف فارغ أو غير مكتمل',
+                            data: row
+                        });
+                        result.skippedRows++;
+                        continue;
+                    }
+
+                    const productCode = String(row[0] || '').trim();
+                    const quantity = Number(row[1]) || 0;
+                    const unitCost = Number(row[2]) || 0;
+
+                    if (!productCode) {
+                        result.errors.push({
+                            row: rowNumber,
+                            productCode: '',
+                            error: 'رمز المنتج مطلوب',
+                            data: row
+                        });
+                        result.skippedRows++;
+                        continue;
+                    }
+
+                    if (quantity < 0) {
+                        result.errors.push({
+                            row: rowNumber,
+                            productCode,
+                            error: 'الكمية يجب أن تكون أكبر من أو تساوي صفر',
+                            data: row
+                        });
+                        result.skippedRows++;
+                        continue;
+                    }
+
+                    // Find product by SKU or barcode
+                    const product = await this.findProductByCode(productCode);
+
+                    if (!product) {
+                        result.errors.push({
+                            row: rowNumber,
+                            productCode,
+                            error: 'المنتج غير موجود',
+                            data: row
+                        });
+                        result.summary.productsNotFound++;
+                        result.skippedRows++;
+                        continue;
+                    }
+
+                    // Process inventory update
+                    await this.processInventoryImport(
+                        (product as any)._id.toString(),
+                        importInventoryDto.branchId,
+                        quantity,
+                        unitCost,
+                        importInventoryDto.importMode,
+                        userId,
+                        importInventoryDto.notes
+                    );
+
+                    result.processedRows++;
+                    result.summary.productsUpdated++;
+                    result.summary.totalQuantityUpdated += quantity;
+                    result.summary.totalValueUpdated += (quantity * unitCost);
+
+                } catch (error) {
+                    result.errors.push({
+                        row: rowNumber,
+                        productCode: String(row[0] || ''),
+                        error: error.message || 'خطأ غير معروف',
+                        data: row
+                    });
+                    result.skippedRows++;
+                }
+            }
+
+            // Update result message based on errors
+            if (result.errors.length > 0) {
+                result.message = `تم استيراد ${result.processedRows} منتج بنجاح، مع ${result.errors.length} أخطاء`;
+            }
+
+            return result;
+
+        } catch (error) {
+            throw new BadRequestException(`خطأ في معالجة الملف: ${error.message}`);
+        }
+    }
+
+    private async findProductByCode(code: string): Promise<Product | null> {
+        // Search by SKU in branch pricing
+        const productBySku = await this.productModel.findOne({
+            'branchPricing.sku': code,
+            isDeleted: false
+        }).exec();
+
+        if (productBySku) {
+            return productBySku;
+        }
+
+        // Search by barcode
+        const productByBarcode = await this.productModel.findOne({
+            barcode: code,
+            isDeleted: false
+        }).exec();
+
+        return productByBarcode;
+    }
+
+    private async processInventoryImport(
+        productId: string,
+        branchId: string,
+        quantity: number,
+        unitCost: number,
+        importMode: 'replace' | 'add' | 'subtract',
+        userId: string,
+        notes?: string
+    ): Promise<void> {
+        // Find existing inventory
+        let inventory = await this.inventoryModel.findOne({
+            productId: new Types.ObjectId(productId),
+            branchId: new Types.ObjectId(branchId),
+            isDeleted: false
+        }).exec();
+
+        let newQuantity = quantity;
+        let transactionType = InventoryTransactionType.ADJUSTMENT;
+
+        if (inventory) {
+            // Update existing inventory
+            switch (importMode) {
+                case 'replace':
+                    newQuantity = quantity;
+                    transactionType = InventoryTransactionType.ADJUSTMENT;
+                    break;
+                case 'add':
+                    newQuantity = inventory.currentStock + quantity;
+                    transactionType = InventoryTransactionType.PURCHASE;
+                    break;
+                case 'subtract':
+                    newQuantity = Math.max(0, inventory.currentStock - quantity);
+                    transactionType = InventoryTransactionType.ADJUSTMENT;
+                    break;
+            }
+
+            inventory.currentStock = newQuantity;
+            inventory.availableStock = newQuantity - inventory.reservedStock;
+            inventory.unitCost = unitCost || inventory.unitCost;
+            inventory.updatedBy = new Types.ObjectId(userId);
+            inventory.lastStockCheckAt = new Date();
+
+            await inventory.save();
+        } else {
+            // Create new inventory record
+            inventory = new this.inventoryModel({
+                productId: new Types.ObjectId(productId),
+                branchId: new Types.ObjectId(branchId),
+                currentStock: quantity,
+                reservedStock: 0,
+                availableStock: quantity,
+                minStockLevel: 0,
+                maxStockLevel: quantity * 2, // Set max to double the imported quantity
+                unitCost: unitCost,
+                currency: 'SYP',
+                unit: 'pieces',
+                isLowStock: false,
+                isOutOfStock: quantity === 0,
+                lastStockCheckAt: new Date(),
+                createdBy: new Types.ObjectId(userId),
+                updatedBy: new Types.ObjectId(userId),
+            });
+
+            await inventory.save();
+            transactionType = InventoryTransactionType.PURCHASE;
+        }
+
+        // Update product's branch pricing with new quantity and cost
+        await this.updateProductBranchPricing(productId, branchId, newQuantity, unitCost);
+
+        // Create transaction record
+        await this.createTransaction({
+            type: transactionType,
+            productId: new Types.ObjectId(productId),
+            toBranchId: new Types.ObjectId(branchId),
+            quantity: importMode === 'subtract' ? -quantity : quantity,
+            unitCost: unitCost,
+            reference: 'Excel Import',
+            notes: notes || `استيراد من ملف Excel - وضع: ${importMode}`,
+            createdBy: new Types.ObjectId(userId),
+        });
+    }
+
+    private async updateProductBranchPricing(
+        productId: string,
+        branchId: string,
+        quantity: number,
+        unitCost: number
+    ): Promise<void> {
+        try {
+            const product = await this.productModel.findById(productId).exec();
+
+            if (!product) {
+                return; // Product not found, skip update
+            }
+
+            // Find existing branch pricing
+            const existingBranchPricingIndex = product.branchPricing.findIndex(
+                (bp: any) => bp.branchId.toString() === branchId
+            );
+
+            if (existingBranchPricingIndex >= 0) {
+                // Update existing branch pricing
+                product.branchPricing[existingBranchPricingIndex].stockQuantity = quantity;
+                if (unitCost > 0) {
+                    product.branchPricing[existingBranchPricingIndex].costPrice = unitCost;
+                }
+            } else {
+                // Create new branch pricing entry
+                const newBranchPricing = {
+                    branchId: new Types.ObjectId(branchId),
+                    price: product.branchPricing[0]?.price || 0, // Use first branch price as default
+                    costPrice: unitCost || 0,
+                    wholeSalePrice: product.branchPricing[0]?.wholeSalePrice || 0,
+                    salePrice: product.branchPricing[0]?.salePrice || 0,
+                    currency: 'SYP',
+                    stockQuantity: quantity,
+                    sku: `${product.name.substring(0, 3).toUpperCase()}${Date.now()}`, // Generate SKU
+                    isOnSale: false,
+                    isActive: true,
+                };
+
+                product.branchPricing.push(newBranchPricing);
+            }
+
+            // Add branch to product's branches array if not already present
+            const branchObjectId = new Types.ObjectId(branchId);
+            if (!product.branches.some(branch => branch.toString() === branchId)) {
+                product.branches.push(branchObjectId);
+            }
+
+            await product.save();
+        } catch (error) {
+            // Log error but don't fail the import process
+            console.error('Error updating product branch pricing:', error);
+        }
+    }
+
+    // Get import template
+    async getImportTemplate(): Promise<Buffer> {
+        const templateData = [
+            ['رمز المنتج', 'الكمية', 'سعر التكلفة'],
+            ['PROD001', 100, 50],
+            ['PROD002', 200, 75],
+            ['PROD003', 150, 60]
+        ];
+
+        const worksheet = XLSX.utils.aoa_to_sheet(templateData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'المخزون');
+
+        return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
     }
 }

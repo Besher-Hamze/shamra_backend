@@ -176,9 +176,9 @@ export class ProductsService {
             if (branchId) {
                 filter.branches = { $in: [branchId] };
             }
-            if (selectedBranchId) {
-                filter.branches = { $in: [selectedBranchId] };
-            }
+            // if (selectedBranchId) {
+            //     filter.branches = { $in: [selectedBranchId] };
+            // }
             if (isOnSale !== undefined) {
                 if (selectedBranchId) {
                     filter['branchPricing'] = {

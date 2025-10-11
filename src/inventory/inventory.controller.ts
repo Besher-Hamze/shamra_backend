@@ -11,7 +11,12 @@ import {
     Request,
     HttpCode,
     HttpStatus,
+    UseInterceptors,
+    UploadedFile,
+    Res,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
 import { InventoryService } from './inventory.service';
 import {
     CreateInventoryDto,
@@ -20,6 +25,7 @@ import {
     StockAdjustmentDto,
     StockTransferDto,
     InventoryTransactionQueryDto,
+    ImportInventoryDto,
 } from './dto';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { UserRole } from 'src/common/enums';
@@ -28,7 +34,7 @@ import { Roles } from 'src/auth/decorators/role.decorator';
 @Controller('inventory')
 @UseGuards(JwtAuthGuard)
 export class InventoryController {
-    constructor(private readonly inventoryService: InventoryService) {}
+    constructor(private readonly inventoryService: InventoryService) { }
 
     @Post()
     @UseGuards(RolesGuard)
@@ -268,5 +274,64 @@ export class InventoryController {
             success: true,
             message: 'تم حذف المخزون بنجاح',
         };
+    }
+
+    // Excel Import Endpoints
+    @Post('import')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @UseInterceptors(FileInterceptor('file'))
+    async importFromExcel(
+        @UploadedFile() file: Express.Multer.File,
+        @Body() importInventoryDto: ImportInventoryDto,
+        @Request() req,
+    ) {
+        if (!file) {
+            return {
+                success: false,
+                message: 'الملف مطلوب',
+            };
+        }
+
+        // Validate file type
+        const allowedMimeTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'text/csv'
+        ];
+
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+            return {
+                success: false,
+                message: 'نوع الملف غير مدعوم. يرجى رفع ملف Excel (.xlsx, .xls) أو CSV',
+            };
+        }
+
+        const result = await this.inventoryService.importInventoryFromExcel(
+            file,
+            importInventoryDto,
+            req.user.sub,
+        );
+
+        return {
+            success: result.success,
+            message: result.message,
+            data: result,
+        };
+    }
+
+    @Get('import/template')
+    @UseGuards(RolesGuard)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    async getImportTemplate(@Res() res: Response) {
+        const templateBuffer = await this.inventoryService.getImportTemplate();
+
+        res.set({
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition': 'attachment; filename="inventory_import_template.xlsx"',
+            'Content-Length': templateBuffer.length.toString(),
+        });
+
+        res.send(templateBuffer);
     }
 }

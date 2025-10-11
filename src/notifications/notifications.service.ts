@@ -25,7 +25,7 @@ admin.initializeApp({
 export class NotificationsService {
   constructor(
     @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
-  ) {}
+  ) { }
 
   /**
    * 🔹 Internal: Send push notification via FCM
@@ -67,7 +67,7 @@ export class NotificationsService {
   async create(createNotificationDto: CreateNotificationDto, userId: string): Promise<Notification> {
     const notification = new this.notificationModel({
       ...createNotificationDto,
-      recipientId:userId,
+      recipientId: userId,
       createdBy: userId,
       updatedBy: userId,
     });
@@ -158,6 +158,31 @@ export class NotificationsService {
       this.notificationModel.countDocuments(filter),
     ]);
 
+    return {
+      data: notifications,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    };
+  }
+
+  async findAllForAdmin(query: NotificationQueryDto) {
+    const { page = 1, limit = 20, recipientId, type, branchId, isRead, priority, search } = query;
+    const skip = (page - 1) * limit;
+    const filter: any = { isDeleted: false };
+    if (recipientId) filter.recipientId = new Types.ObjectId(recipientId);
+    if (type) filter.type = type;
+    if (branchId) filter.branchId = new Types.ObjectId(branchId);
+    if (isRead !== undefined) filter.isRead = isRead;
+    if (priority) filter.priority = priority;
+    if (search) filter.$text = { $search: search };
+    const [notifications, total] = await Promise.all([
+      this.notificationModel
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .exec(),
+      this.notificationModel.countDocuments(filter),
+    ]);
     return {
       data: notifications,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
