@@ -317,6 +317,7 @@ export class NotificationsService {
       recipientId: userId,
       title,
       body,
+      message: body,
       orderId,
       status,
       isRead: false,
