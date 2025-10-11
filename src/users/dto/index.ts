@@ -87,6 +87,10 @@ export class UpdateUserDto {
     @IsOptional()
     @IsBoolean()
     isActive?: boolean;
+
+    @IsOptional()
+    @IsString()
+    fcmToken?: string;
 }
 
 // Change Password DTO

@@ -37,7 +37,7 @@ export class CreateNotificationDto {
     @IsObject()
     metadata?: Record<string, any>;
 
-@IsOptional()
+    @IsOptional()
     @IsString()
-    fcmToken:string
+    fcmToken: string
 }

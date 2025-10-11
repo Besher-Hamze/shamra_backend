@@ -8,6 +8,10 @@ export class LoginDto {
     @IsString()
     @MinLength(6)
     password: string;
+
+    @IsOptional()
+    @IsString()
+    fcmToken?: string
 }
 
 // Register DTO
@@ -28,12 +32,12 @@ export class RegisterDto {
     password: string;
 
     @IsString()
-    phoneNumber:string;
+    phoneNumber: string;
 
     @IsOptional()
     @IsString()
-    fcmToken?:string
-    
+    fcmToken?: string
+
 }
 
 // Refresh Token DTO

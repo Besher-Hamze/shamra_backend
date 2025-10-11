@@ -76,7 +76,7 @@ export class NotificationsService {
 
     if (createNotificationDto.fcmToken) {
       await this.sendPushNotification(
-        createNotificationDto.fcmToken,
+        [createNotificationDto.fcmToken],
         createNotificationDto.title,
         createNotificationDto.message,
         { type: createNotificationDto.type ?? 'GENERAL' },
