@@ -59,7 +59,6 @@ export class BranchesController {
     }
 
     @Get('active')
-    @UseGuards(JwtAuthGuard)
     async getActiveBranches() {
         const branches = await this.branchesService.getActiveBranches();
         return {
