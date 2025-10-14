@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RegisterDto, RefreshTokenDto, SendOtpDto } from './dto';
+import { LoginDto, RegisterDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto';
 import { UserRole } from 'src/common/enums';
 import { JwtPayload } from 'src/common/interfaces';
 import { BranchesService } from 'src/branches/branches.service';
@@ -146,7 +146,7 @@ export class AuthService {
             },
         };
     }
-    // Register new user (requires OTP verification)
+    // Register new user (send OTP after creation)
     async register(registerDto: RegisterDto) {
         // Check if user already exists
         if (registerDto.email) {
@@ -156,12 +156,8 @@ export class AuthService {
             }
         }
 
-        // Verify OTP
+        // Normalize phone
         const normalizedPhone = this.otpService.normalizePhoneNumber(registerDto.phoneNumber);
-        const isOtpValid = this.otpService.verifyOtp(normalizedPhone, registerDto.otp);
-        if (!isOtpValid) {
-            throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
-        }
 
         // Create new user with customer role
         const user = await this.usersService.create({
@@ -182,24 +178,24 @@ export class AuthService {
             selectedBranchObject: selectedBranchId,
         };
 
-        const accessToken = this.jwtService.sign(payload);
-        const refreshToken = this.jwtService.sign(payload, {
-            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-            expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
-        });
+        // Send OTP after successful registration
+        const otp = this.otpService.generateOtp();
+        await this.otpService.sendOtp(normalizedPhone, otp);
 
         return {
-            access_token: accessToken,
-            refresh_token: refreshToken,
-            user: {
-                _id: user._id.toString(),
-                firstName: user.firstName,
-                lastName: user.lastName,
-                fullName: user.fullName,
-                phoneNumber: user.phoneNumber,
-                role: user.role,
-            },
-        };
+            success: true,
+            message: 'تم إنشاء الحساب بنجاح، تم إرسال رمز التحقق إلى رقم الهاتف',
+            data: {
+                user: {
+                    _id: user._id.toString(),
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    fullName: user.fullName,
+                    phoneNumber: user.phoneNumber,
+                    role: user.role,
+                }
+            }
+        } as any;
     }
 
     // Refresh access token
@@ -261,6 +257,58 @@ export class AuthService {
             message: result.message,
             // In development, you might want to return the OTP for testing
             // otp: otp // Remove this in production
+        };
+    }
+
+    // Verify OTP after registration
+    async verifyOtpPostRegister(verifyOtpDto: VerifyOtpDto) {
+        const { phoneNumber, otp } = verifyOtpDto;
+        const normalizedPhone = this.otpService.normalizePhoneNumber(phoneNumber);
+        const isValid = this.otpService.verifyOtp(normalizedPhone, otp);
+        if (!isValid) {
+            throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
+        }
+
+        // Optionally, mark user as verified (if you have such a flag)
+        const user = await this.usersService.findByPhoneNumber(normalizedPhone);
+        if (!user) {
+            throw new NotFoundException('مستخدم غير موجود');
+        }
+
+        const defaultBranch = await this.branchesService.getDefaultBranch();
+        if (!defaultBranch) {
+            throw new NotFoundException('الفرع الرئيسي غير موجود');
+        }
+
+        const payload: JwtPayload = {
+            sub: user._id.toString(),
+            phoneNumber: user.phoneNumber,
+            role: user.role,
+            branchId: user.branchId?.toString(),
+            selectedBranchId: defaultBranch?._id.toString(),
+            selectedBranchObject: defaultBranch,
+        };
+
+        const accessToken = this.jwtService.sign(payload);
+        const refreshToken = this.jwtService.sign(payload, {
+            secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+            expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+        });
+
+        return {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            user: {
+                _id: user._id.toString(),
+                firstName: user.firstName,
+                lastName: user.lastName,
+                fullName: user.fullName,
+                phoneNumber: user.phoneNumber,
+                selectedBranchObject: defaultBranch,
+                role: user.role,
+                branchId: user.branchId?.toString(),
+                selectedBranchId: defaultBranch?._id.toString(),
+            },
         };
     }
 

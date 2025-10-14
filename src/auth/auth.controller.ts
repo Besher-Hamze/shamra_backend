@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard, LocalAuthGuard } from './gurads';
-import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto } from './dto';
+import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto, VerifyOtpDto } from './dto';
 import { GetSelectedBranchObject, GetUserId } from 'src/common/decorators';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 
@@ -94,5 +94,15 @@ export class AuthController {
         };
     }
 
-    // OTP login endpoints removed; OTP is only for registration now
+    // Verify OTP after registration
+    @Post('verify-otp')
+    @HttpCode(HttpStatus.OK)
+    async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+        const result = await this.authService.verifyOtpPostRegister(verifyOtpDto);
+        return {
+            success: true,
+            message: 'تم تفعيل الحساب بنجاح',
+            data: result,
+        };
+    }
 }

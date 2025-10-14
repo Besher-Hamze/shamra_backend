@@ -22,8 +22,16 @@ export class SendOtpDto {
     phoneNumber: string;
 }
 
-// Verify OTP DTO
-// Removed OTP login DTOs; OTP is only for registration
+// Verify OTP DTO (post-register verification)
+export class VerifyOtpDto {
+    @IsString()
+    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    phoneNumber: string;
+
+    @IsString()
+    @MinLength(4)
+    otp: string;
+}
 
 // Register DTO
 export class RegisterDto {
@@ -54,11 +62,6 @@ export class RegisterDto {
     @IsOptional()
     @IsString()
     branchId?: string
-
-    @IsString()
-    @MinLength(4)
-    otp: string;
-
 }
 
 // Refresh Token DTO
