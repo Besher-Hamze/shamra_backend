@@ -34,7 +34,8 @@ export interface ApiResponse<T = any> {
 // JWT Payload interface
 export interface JwtPayload {
     sub: string;
-    email: string;
+    phoneNumber: string;
+    email?: string; // Keep for backward compatibility
     role: string;
     branchId?: string;
     selectedBranchId?: string;

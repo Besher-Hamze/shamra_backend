@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard, LocalAuthGuard } from './gurads';
-import { LoginDto, RefreshTokenDto, RegisterDto } from './dto';
+import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto } from './dto';
 import { GetSelectedBranchObject, GetUserId } from 'src/common/decorators';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 
@@ -19,7 +19,6 @@ export class AuthController {
     constructor(private readonly authService: AuthService) { }
 
     @Post('login')
-    @UseGuards(LocalAuthGuard)
     @HttpCode(HttpStatus.OK)
     async login(@Body() loginDto: LoginDto) {
         const result = await this.authService.login(loginDto);
@@ -83,4 +82,17 @@ export class AuthController {
             message: 'تم تسجيل الخروج بنجاح',
         };
     }
+
+    @Post('send-otp')
+    @HttpCode(HttpStatus.OK)
+    async sendOtp(@Body() sendOtpDto: SendOtpDto) {
+        const result = await this.authService.sendOtp(sendOtpDto);
+        return {
+            success: true,
+            message: result.message,
+            data: result,
+        };
+    }
+
+    // OTP login endpoints removed; OTP is only for registration now
 }

@@ -24,12 +24,20 @@ export class UsersService {
 
     // Create new user
     async create(createUserDto: CreateUserDto): Promise<User> {
-        const { email, password } = createUserDto;
+        const { email, phoneNumber, password } = createUserDto;
 
-        // Check if user already exists
-        const existingUser = await this.userModel.findOne({ email }).exec();
-        if (existingUser) {
-            throw new ConflictException('User with this email already exists');
+        // Check if user already exists by email (if provided)
+        if (email) {
+            const existingUserByEmail = await this.userModel.findOne({ email }).exec();
+            if (existingUserByEmail) {
+                throw new ConflictException('User with this email already exists');
+            }
+        }
+
+        // Check if user already exists by phone number
+        const existingUserByPhone = await this.userModel.findOne({ phoneNumber }).exec();
+        if (existingUserByPhone) {
+            throw new ConflictException('User with this phone number already exists');
         }
 
         // Hash password
@@ -114,6 +122,16 @@ export class UsersService {
     async findByEmail(email: string): Promise<User | null> {
         const user = await this.userModel
             .findOne({ email, isDeleted: { $ne: true } })
+            .select('+password')
+            .lean()
+            .exec() as any;
+        return user;
+    }
+
+    // Find user by phone number (for authentication)
+    async findByPhoneNumber(phoneNumber: string): Promise<User | null> {
+        const user = await this.userModel
+            .findOne({ phoneNumber, isDeleted: { $ne: true } })
             .select('+password')
             .lean()
             .exec() as any;

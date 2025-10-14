@@ -3,15 +3,17 @@ import {
     UnauthorizedException,
     ConflictException,
     NotFoundException,
+    BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RegisterDto, RefreshTokenDto } from './dto';
+import { LoginDto, RegisterDto, RefreshTokenDto, SendOtpDto } from './dto';
 import { UserRole } from 'src/common/enums';
 import { JwtPayload } from 'src/common/interfaces';
 import { BranchesService } from 'src/branches/branches.service';
+import { OtpService } from './otp.service';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +22,13 @@ export class AuthService {
         private jwtService: JwtService,
         private configService: ConfigService,
         private branchesService: BranchesService,
+        private otpService: OtpService,
     ) { }
 
-    // Validate user credentials
-    async validateUser(email: string, password: string): Promise<any> {
-        const user = await this.usersService.findByEmail(email);
+    // Validate user credentials (phone/password)
+    async validateUser(phoneNumber: string, password: string): Promise<any> {
+        const normalizedPhone = this.otpService.normalizePhoneNumber(phoneNumber);
+        const user = await this.usersService.findByPhoneNumber(normalizedPhone);
 
         if (!user || !user.isActive) {
             return null;
@@ -42,9 +46,9 @@ export class AuthService {
         return result;
     }
 
-    // Login user
+    // Login user (phone + password)
     async login(loginDto: LoginDto) {
-        const user = await this.validateUser(loginDto.email, loginDto.password);
+        const user = await this.validateUser(loginDto.phoneNumber, loginDto.password);
 
         if (!user) {
             throw new UnauthorizedException('بيانات الدخول غير صحيحة');
@@ -59,7 +63,7 @@ export class AuthService {
         }
         const payload: JwtPayload = {
             sub: user._id.toString(),
-            email: user.email,
+            phoneNumber: user.phoneNumber,
             role: user.role,
             branchId: user.branchId?.toString(),
             selectedBranchId: defaultBranch?._id.toString(),
@@ -80,7 +84,7 @@ export class AuthService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 fullName: user.fullName,
-                email: user.email,
+                phoneNumber: user.phoneNumber,
                 selectedBranchObject: defaultBranch,
                 role: user.role,
                 branchId: user.branchId?.toString(),
@@ -109,7 +113,7 @@ export class AuthService {
 
         const payload: JwtPayload = {
             sub: updatedUser._id.toString(),
-            email: updatedUser.email,
+            phoneNumber: updatedUser.phoneNumber,
             role: updatedUser.role,
             branchId: updatedUser.branchId?.toString(),
             selectedBranchId: selectedBranchId._id.toString(),
@@ -133,7 +137,7 @@ export class AuthService {
                     firstName: updatedUser.firstName,
                     lastName: updatedUser.lastName,
                     fullName: updatedUser.fullName,
-                    email: updatedUser.email,
+                    phoneNumber: updatedUser.phoneNumber,
                     role: updatedUser.role,
                     branchId: updatedUser.branchId?.toString(),
                     selectedBranchId: selectedBranchId._id.toString(),
@@ -142,17 +146,27 @@ export class AuthService {
             },
         };
     }
-    // Register new user
+    // Register new user (requires OTP verification)
     async register(registerDto: RegisterDto) {
         // Check if user already exists
-        const existingUser = await this.usersService.findByEmail(registerDto.email);
-        if (existingUser) {
-            throw new ConflictException('مستخدم بهذا البريد الإلكتروني موجود مسبقاً');
+        if (registerDto.email) {
+            const existingUser = await this.usersService.findByEmail(registerDto.email);
+            if (existingUser) {
+                throw new ConflictException('مستخدم بهذا البريد الإلكتروني موجود مسبقاً');
+            }
+        }
+
+        // Verify OTP
+        const normalizedPhone = this.otpService.normalizePhoneNumber(registerDto.phoneNumber);
+        const isOtpValid = this.otpService.verifyOtp(normalizedPhone, registerDto.otp);
+        if (!isOtpValid) {
+            throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
         }
 
         // Create new user with customer role
         const user = await this.usersService.create({
             ...registerDto,
+            phoneNumber: normalizedPhone,
             role: UserRole.CUSTOMER,
             isActive: true,
         });
@@ -161,7 +175,7 @@ export class AuthService {
         // Generate tokens
         const payload: JwtPayload = {
             sub: user._id.toString(),
-            email: user.email,
+            phoneNumber: user.phoneNumber,
             role: user.role,
             branchId: user.branchId?.toString(),
             selectedBranchId: user.branchId?.toString(),
@@ -182,7 +196,7 @@ export class AuthService {
                 firstName: user.firstName,
                 lastName: user.lastName,
                 fullName: user.fullName,
-                email: user.email,
+                phoneNumber: user.phoneNumber,
                 role: user.role,
             },
         };
@@ -202,7 +216,7 @@ export class AuthService {
 
             const payload: JwtPayload = {
                 sub: user._id.toString(),
-                email: user.email,
+                phoneNumber: user.phoneNumber,
                 role: user.role,
                 branchId: user.branchId?.toString(),
             };
@@ -219,4 +233,36 @@ export class AuthService {
     async getProfile(userId: string) {
         return await this.usersService.findById(userId);
     }
+
+    // Send OTP to phone number
+    async sendOtp(sendOtpDto: SendOtpDto) {
+        const { phoneNumber } = sendOtpDto;
+
+        // Normalize phone number
+        const normalizedPhone = this.otpService.normalizePhoneNumber(phoneNumber);
+
+        // Validate phone number
+        if (!this.otpService.validatePhoneNumber(normalizedPhone)) {
+            throw new BadRequestException('رقم الهاتف غير صحيح');
+        }
+
+        // Generate OTP
+        const otp = this.otpService.generateOtp();
+
+        // Send OTP via external service
+        const result = await this.otpService.sendOtp(normalizedPhone, otp);
+
+        // In a real application, you would store the OTP in a cache/database
+        // with expiration time (e.g., Redis with 5 minutes TTL)
+        // For now, we'll just return success
+
+        return {
+            success: true,
+            message: result.message,
+            // In development, you might want to return the OTP for testing
+            // otp: otp // Remove this in production
+        };
+    }
+
+    // (OTP login removed; OTP used only during registration)
 }

@@ -10,6 +10,7 @@ import {
     IsNumber,
     Min,
     Max,
+    Matches,
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { UserRole } from 'src/common/enums';
@@ -26,8 +27,9 @@ export class CreateUserDto {
     @MaxLength(50)
     lastName: string;
 
+    @IsOptional()
     @IsEmail()
-    email: string;
+    email?: string;
 
     @IsString()
     @MinLength(6)
@@ -37,9 +39,9 @@ export class CreateUserDto {
     @IsEnum(UserRole)
     role?: UserRole;
 
-    @IsOptional()
     @IsString()
-    phoneNumber?: string;
+    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    phoneNumber: string;
 
     @IsOptional()
     @IsString()
