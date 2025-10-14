@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard, LocalAuthGuard } from './gurads';
-import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto, VerifyOtpDto } from './dto';
+import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto, VerifyOtpDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { GetSelectedBranchObject, GetUserId } from 'src/common/decorators';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 
@@ -102,6 +102,28 @@ export class AuthController {
         return {
             success: true,
             message: 'تم تفعيل الحساب بنجاح',
+            data: result,
+        };
+    }
+
+    @Post('forgot-password')
+    @HttpCode(HttpStatus.OK)
+    async forgotPassword(@Body() dto: ForgotPasswordDto) {
+        const result = await this.authService.forgotPassword(dto);
+        return {
+            success: true,
+            message: result.message,
+            data: result,
+        };
+    }
+
+    @Post('reset-password')
+    @HttpCode(HttpStatus.OK)
+    async resetPassword(@Body() dto: ResetPasswordDto) {
+        const result = await this.authService.resetPassword(dto);
+        return {
+            success: true,
+            message: result.message,
             data: result,
         };
     }

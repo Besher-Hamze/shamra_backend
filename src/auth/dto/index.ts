@@ -33,6 +33,28 @@ export class VerifyOtpDto {
     otp: string;
 }
 
+// Forgot Password DTO (send OTP)
+export class ForgotPasswordDto {
+    @IsString()
+    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    phoneNumber: string;
+}
+
+// Reset Password DTO (verify OTP + new password)
+export class ResetPasswordDto {
+    @IsString()
+    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    phoneNumber: string;
+
+    @IsString()
+    @MinLength(4)
+    otp: string;
+
+    @IsString()
+    @MinLength(6)
+    newPassword: string;
+}
+
 // Register DTO
 export class RegisterDto {
     @IsString()

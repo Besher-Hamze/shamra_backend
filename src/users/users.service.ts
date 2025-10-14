@@ -189,6 +189,19 @@ export class UsersService {
             .exec();
     }
 
+    // Set password directly by user id (used for reset password)
+    async setPasswordById(id: string, newPassword: string): Promise<void> {
+        const user = await this.userModel.findById(id).exec();
+        if (!user || user.isDeleted) {
+            throw new NotFoundException('User not found');
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 12);
+        await this.userModel
+            .findByIdAndUpdate(id, { password: hashedPassword })
+            .exec();
+    }
+
     // Soft delete user
     async remove(id: string): Promise<void> {
         const user = await this.userModel.findById(id).exec();

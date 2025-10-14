@@ -4,7 +4,7 @@ import axios from 'axios';
 
 @Injectable()
 export class OtpService {
-    private readonly otpApiUrl = 'https://otp.anycode-sy.com/api/send-otp';
+    private readonly otpApiUrl = 'https://otp.anycode-sy.com/api/auth/send-otp';
     private readonly apiKey = 'b13e211b-9905-4715-9522-a2f257c7c358';
     private readonly phoneToOtp: Map<string, { otp: string; expiresAt: number }> = new Map();
     private readonly ttlMs = 5 * 60 * 1000; // 5 minutes
@@ -28,7 +28,7 @@ export class OtpService {
                 }
             );
 
-            if (response.data && response.data.message === 'OTP SEND SUCCESSFULLY') {
+            if (response.status == 201) {
                 // store OTP with TTL
                 this.phoneToOtp.set(phoneNumber, { otp, expiresAt: Date.now() + this.ttlMs });
                 return {
@@ -36,6 +36,8 @@ export class OtpService {
                     message: 'تم إرسال رمز التحقق بنجاح'
                 };
             } else {
+                console.log(response.data);
+
                 throw new HttpException(
                     'فشل في إرسال رمز التحقق',
                     HttpStatus.BAD_REQUEST
@@ -68,7 +70,7 @@ export class OtpService {
 
     generateOtp(): string {
         // Generate a 6-digit OTP
-        return Math.floor(100000 + Math.random() * 900000).toString();
+        return Math.floor(1000 + Math.random() * 9000).toString();
     }
 
     verifyOtp(phoneNumber: string, otp: string): boolean {

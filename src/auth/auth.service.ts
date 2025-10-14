@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { LoginDto, RegisterDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto } from './dto';
+import { LoginDto, RegisterDto, RefreshTokenDto, SendOtpDto, VerifyOtpDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { UserRole } from 'src/common/enums';
 import { JwtPayload } from 'src/common/interfaces';
 import { BranchesService } from 'src/branches/branches.service';
@@ -313,4 +313,31 @@ export class AuthService {
     }
 
     // (OTP login removed; OTP used only during registration)
+    // Forgot password: send OTP to phone
+    async forgotPassword(dto: ForgotPasswordDto) {
+        const normalizedPhone = this.otpService.normalizePhoneNumber(dto.phoneNumber);
+        const user = await this.usersService.findByPhoneNumber(normalizedPhone);
+        if (!user) {
+            // Do not reveal user existence
+            return { success: true, message: 'تم إرسال رمز التحقق إن وجد' };
+        }
+        const otp = this.otpService.generateOtp();
+        await this.otpService.sendOtp(normalizedPhone, otp);
+        return { success: true, message: 'تم إرسال رمز التحقق' };
+    }
+
+    // Reset password using OTP
+    async resetPassword(dto: ResetPasswordDto) {
+        const normalizedPhone = this.otpService.normalizePhoneNumber(dto.phoneNumber);
+        const isValid = this.otpService.verifyOtp(normalizedPhone, dto.otp);
+        if (!isValid) {
+            throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
+        }
+        const user = await this.usersService.findByPhoneNumber(normalizedPhone);
+        if (!user) {
+            throw new NotFoundException('مستخدم غير موجود');
+        }
+        await this.usersService.setPasswordById(user._id.toString(), dto.newPassword);
+        return { success: true, message: 'تم إعادة تعيين كلمة المرور بنجاح' };
+    }
 }
