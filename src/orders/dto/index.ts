@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 import { CurrencyEnum, OrderStatus } from 'src/common/enums';
+import { CoordinatesDto } from 'src/branches/dto';
 
 // Order Item DTO
 export class OrderItemDto {
@@ -70,6 +71,11 @@ export class CreateOrderDto {
     @IsOptional()
     @IsBoolean()
     isPaid?: boolean = false;
+
+    @IsOptional()
+    @ValidateNested()
+    @Type(() => CoordinatesDto)
+    location?: CoordinatesDto;
 }
 
 // Update Order DTO

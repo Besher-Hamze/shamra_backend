@@ -32,7 +32,7 @@ export class OrdersService {
 
     // Create new order
     async create(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
-        const { items, branchId, pointsToRedeem, currency = CurrencyEnum.USD } = createOrderDto;
+        const { items, branchId, pointsToRedeem, currency = CurrencyEnum.USD, location } = createOrderDto;
 
         const customer = await this.userModel.findById(userId).exec();
         if (!customer || customer.isDeleted) {
@@ -55,7 +55,7 @@ export class OrdersService {
             }
 
             const total = item.quantity * item.price;
-            orderItems.push({ ...item, total });
+            orderItems.push({ ...item, total, categoryId: product.categoryId });
             subtotal += total;
         }
 
@@ -100,6 +100,7 @@ export class OrdersService {
             userId,
             createdBy: userId,
             updatedBy: userId,
+            location,
         });
 
         const savedOrder = await order.save();
@@ -154,6 +155,7 @@ export class OrdersService {
         if (status) filter.status = status;
         if (isPaid !== undefined) filter.isPaid = isPaid;
 
+        if (categoryId) filter.items.categoryId = categoryId;
         if (search) {
             filter.$or = [
                 { orderNumber: { $regex: search, $options: 'i' } },

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { CoordinatesDto } from 'src/branches/dto';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 import { CurrencyEnum, OrderStatus } from 'src/common/enums';
 import { User } from 'src/users/scheme/user.scheme';
@@ -12,6 +13,9 @@ export class OrderItem {
 
     @Prop({ required: true })
     productName: string;
+
+    @Prop()
+    categoryId: string;
 
     @Prop({ required: true, min: 1 })
     quantity: number;
@@ -56,8 +60,8 @@ export class Order {
     @Prop({ type: String, enum: OrderStatus, default: OrderStatus.PENDING })
     status: OrderStatus;
 
-    @Prop({enum:CurrencyEnum,default:CurrencyEnum.USD})
-    currency:string;
+    @Prop({ enum: CurrencyEnum, default: CurrencyEnum.USD })
+    currency: string;
 
     @Prop({ trim: true })
     notes: string;
@@ -77,6 +81,8 @@ export class Order {
     @Prop({ type: Types.ObjectId, ref: 'User' })
     updatedBy: Types.ObjectId;
 
+    @Prop({ type: CoordinatesDto })
+    location: CoordinatesDto;
 
     branch?: Branch;
 
