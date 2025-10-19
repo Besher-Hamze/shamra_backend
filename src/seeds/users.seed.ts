@@ -55,10 +55,9 @@ export class UsersSeedService {
             const adminUser = await this.userModel.create({
                 firstName: 'Admin',
                 lastName: 'User',
-                email: 'admin@shamra.com',
                 password: adminPassword,
                 role: UserRole.ADMIN,
-                phoneNumber: '+963 11 111 1111',
+                phoneNumber: '+963945739573',
                 branchId: defaultBranch._id,
                 isActive: true,
                 isEmailVerified: true,

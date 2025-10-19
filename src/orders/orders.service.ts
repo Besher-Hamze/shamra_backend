@@ -172,7 +172,7 @@ export class OrdersService {
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .populate('userId', 'firstName lastName email')
+            .populate("user")
             .populate('branch', 'name code')
             .populate('createdBy', 'firstName lastName')
             .exec();
