@@ -32,10 +32,10 @@ export class Settings {
     @Prop({ default: false })
     isDeleted: boolean;
 
-    @Prop({ type: Types.ObjectId, ref: 'User' })
+    @Prop({ type: Types.ObjectId, ref: 'User', required: false })
     createdBy: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: 'User' })
+    @Prop({ type: Types.ObjectId, ref: 'User', required: false })
     updatedBy: Types.ObjectId;
 }
 

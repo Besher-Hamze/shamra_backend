@@ -211,11 +211,16 @@ export class SettingsService {
             throw new ConflictException('الإعداد موجود بالفعل');
         }
 
-        const setting = new this.settingsModel({
-            ...createSettingDto,
-            createdBy: userId,
-            updatedBy: userId,
-        });
+        // Handle system user ID - don't set createdBy/updatedBy for system
+        const settingData: any = { ...createSettingDto };
+
+        // Only set user IDs if userId is not 'system' and is a valid ObjectId
+        if (userId !== 'system' && userId.match(/^[0-9a-fA-F]{24}$/)) {
+            settingData.createdBy = userId;
+            settingData.updatedBy = userId;
+        }
+
+        const setting = new this.settingsModel(settingData);
 
         const savedSetting = await setting.save();
 
@@ -244,8 +249,16 @@ export class SettingsService {
                 .sort({ category: 1, key: 1 })
                 .skip(skip)
                 .limit(limit)
-                .populate('createdBy', 'firstName lastName')
-                .populate('updatedBy', 'firstName lastName')
+                .populate({
+                    path: 'createdBy',
+                    select: 'firstName lastName',
+                    match: { _id: { $ne: null } }
+                })
+                .populate({
+                    path: 'updatedBy',
+                    select: 'firstName lastName',
+                    match: { _id: { $ne: null } }
+                })
                 .exec(),
             this.settingsModel.countDocuments(filter),
         ]);
@@ -264,8 +277,16 @@ export class SettingsService {
     async findOne(key: string): Promise<Settings> {
         const setting = await this.settingsModel
             .findOne({ key, isDeleted: false })
-            .populate('createdBy', 'firstName lastName')
-            .populate('updatedBy', 'firstName lastName')
+            .populate({
+                path: 'createdBy',
+                select: 'firstName lastName',
+                match: { _id: { $ne: null } }
+            })
+            .populate({
+                path: 'updatedBy',
+                select: 'firstName lastName',
+                match: { _id: { $ne: null } }
+            })
             .exec();
 
         if (!setting) {
@@ -338,12 +359,19 @@ export class SettingsService {
     }
 
     async update(key: string, updateSettingDto: UpdateSettingDto, userId: string): Promise<Settings> {
+        // Handle system user ID - don't set updatedBy for system
+        const updateData: any = { ...updateSettingDto };
+
+        // Only set updatedBy if userId is not 'system' and is a valid ObjectId
+        if (userId !== 'system' && userId.match(/^[0-9a-fA-F]{24}$/)) {
+            updateData.updatedBy = userId;
+        }
+
+        console.log(key, updateData);
+
         const setting = await this.settingsModel.findOneAndUpdate(
             { key, isDeleted: false },
-            {
-                ...updateSettingDto,
-                updatedBy: userId,
-            },
+            updateData,
             { new: true }
         );
 
@@ -375,12 +403,17 @@ export class SettingsService {
     }
 
     async remove(key: string, userId: string): Promise<void> {
+        // Handle system user ID - don't set updatedBy for system
+        const updateData: any = { isDeleted: true };
+
+        // Only set updatedBy if userId is not 'system' and is a valid ObjectId
+        if (userId !== 'system' && userId.match(/^[0-9a-fA-F]{24}$/)) {
+            updateData.updatedBy = userId;
+        }
+
         const setting = await this.settingsModel.findOneAndUpdate(
             { key, isDeleted: false },
-            {
-                isDeleted: true,
-                updatedBy: userId,
-            }
+            updateData
         );
 
         if (!setting) {
@@ -395,20 +428,24 @@ export class SettingsService {
         return await this.settingsModel
             .find({ category, isDeleted: false })
             .sort({ key: 1 })
-            .populate('createdBy', 'firstName lastName')
-            .populate('updatedBy', 'firstName lastName')
             .exec();
     }
 
     async resetToDefault(key: string, userId: string): Promise<Settings> {
         // This would typically reset to a predefined default value
         // For now, we'll just mark it as editable
+
+        // Handle system user ID - don't set updatedBy for system
+        const updateData: any = { isEditable: true };
+
+        // Only set updatedBy if userId is not 'system' and is a valid ObjectId
+        if (userId !== 'system' && userId.match(/^[0-9a-fA-F]{24}$/)) {
+            updateData.updatedBy = userId;
+        }
+
         const setting = await this.settingsModel.findOneAndUpdate(
             { key, isDeleted: false },
-            {
-                isEditable: true,
-                updatedBy: userId,
-            },
+            updateData,
             { new: true }
         );
 

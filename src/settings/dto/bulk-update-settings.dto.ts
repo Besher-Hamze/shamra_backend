@@ -1,11 +1,11 @@
-import { IsArray, IsObject, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class SettingUpdateItem {
     @IsString()
     key: string;
 
-    @IsObject()
+    @IsNumber()
     value: any;
 }
 
