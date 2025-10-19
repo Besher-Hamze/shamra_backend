@@ -20,6 +20,7 @@ import { Category, CategoryDocument } from 'src/categories/scheme/category.schem
 import { SubCategory, SubCategoryDocument } from 'src/sub-categories/scheme/sub-category.scheme';
 import { Branch, BranchDocument } from 'src/branches/scheme/branche.scheme';
 import { SubCategoryType, UserRole } from 'src/common/enums';
+import { User, UserDocument } from 'src/users/scheme/user.scheme';
 
 @Injectable()
 export class ProductsService {
@@ -30,6 +31,7 @@ export class ProductsService {
         @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
         @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategoryDocument>,
         @InjectModel(Branch.name) private branchModel: Model<BranchDocument>,
+        @InjectModel(User.name) private userModel: Model<UserDocument>,
     ) { }
 
     // Create new product
@@ -110,7 +112,7 @@ export class ProductsService {
     }
 
     // Find all products with pagination and filtering
-    async findAll(query: ProductQueryDto, userRole?: UserRole) {
+    async findAll(query: ProductQueryDto, userId: string, userRole?: UserRole) {
         try {
             const {
                 page = 1,
@@ -128,9 +130,10 @@ export class ProductsService {
                 search,
                 tags,
                 branchId,
-                selectedBranchId,
             } = query;
 
+            const user = await this.userModel.findById(userId).exec();
+            const selectedBranchId = user.branchId;
             // Build filter
             const filter: any = { isDeleted: { $ne: true } };
 

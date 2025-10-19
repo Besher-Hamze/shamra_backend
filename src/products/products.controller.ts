@@ -26,7 +26,7 @@ import {
 import { UserRole } from 'src/common/enums';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { FilesService } from 'src/files/files.service';
-import { GetSelectedBranchId, GetUserRole, ProductImagesUpload } from 'src/common/decorators';
+import { GetSelectedBranchId, GetUserId, GetUserRole, ProductImagesUpload } from 'src/common/decorators';
 import { parseJsonField } from 'src/common/helpers';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { Branch } from 'src/branches/scheme/branche.scheme';
@@ -129,11 +129,8 @@ export class ProductsController {
     }
 
     @Get()
-    async findAll(@Query() query: ProductQueryDto, @GetSelectedBranchId() branchId?: string, @GetUserRole() userRole?: UserRole) {
-        if (branchId) {
-            query.selectedBranchId = branchId;
-        }
-        const result = await this.productsService.findAll(query, userRole);
+    async findAll(@Query() query: ProductQueryDto, @GetUserId() userId: string, @GetUserRole() userRole?: UserRole) {
+        const result = await this.productsService.findAll(query, userId, userRole);
         return {
             success: true,
             message: 'تم جلب المنتجات بنجاح',
