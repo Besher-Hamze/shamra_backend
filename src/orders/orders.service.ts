@@ -155,7 +155,7 @@ export class OrdersService {
         if (status) filter.status = status;
         if (isPaid !== undefined) filter.isPaid = isPaid;
 
-        if (categoryId) filter.items.categoryId = categoryId;
+        if (categoryId) filter['items.categoryId'] = categoryId;
         if (search) {
             filter.$or = [
                 { orderNumber: { $regex: search, $options: 'i' } },
