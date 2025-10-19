@@ -44,10 +44,10 @@ export class AuthService {
 
         const { password: _, ...result } = user;
         return result;
-    }
+    } 
 
     // Login user (phone + password)
-    async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto) {
         const user = await this.validateUser(loginDto.phoneNumber, loginDto.password);
 
         if (!user) {
@@ -146,57 +146,108 @@ export class AuthService {
             },
         };
     }
+
+
+
+    // ---- NEW: build & verify registration token ----
+  private buildRegistrationToken(phoneNumber: string): string {
+    return this.jwtService.sign(
+      { purpose: 'register', phoneNumber },
+      {
+        secret: this.configService.get<string>('REGISTER_TOKEN_SECRET'),
+        expiresIn: this.configService.get<string>('REGISTER_TOKEN_EXPIRES_IN') ?? '5m',
+      },
+    );
+  }
+
+
+
+   private assertRegistrationToken(token: string, phoneNumber: string) {
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret: this.configService.get<string>('REGISTER_TOKEN_SECRET'),
+      });
+      if (payload?.purpose !== 'register' || payload?.phoneNumber !== phoneNumber) {
+        throw new UnauthorizedException('رمز التحقق غير صالح لعملية التسجيل');
+      }
+    } catch {
+      throw new UnauthorizedException('رمز التحقق غير صالح أو منتهي الصلاحية');
+    }
+  }
+
+async verifyOtpPreRegister(verifyOtpDto: VerifyOtpDto) {
+    const { phoneNumber, otp } = verifyOtpDto;
+    const normalized = this.otpService.normalizePhoneNumber(phoneNumber);
+
+    // يستهلك الـOTP (نجعل الحصول على التوكن خطوة واحدة بعد نجاح التحقق)
+    const ok = this.otpService.verifyOtp(normalized, otp);
+    if (!ok) {
+      throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
+    }
+    const registrationToken = this.buildRegistrationToken(normalized);
+    return { registrationToken };
+  }
+
+
     // Register new user (send OTP after creation)
     async register(registerDto: RegisterDto) {
-        // Check if user already exists
-        if (registerDto.email) {
-            const existingUser = await this.usersService.findByEmail(registerDto.email);
-            if (existingUser) {
-                throw new ConflictException('مستخدم بهذا البريد الإلكتروني موجود مسبقاً');
-            }
-        }
+    const normalizedPhone = this.otpService.normalizePhoneNumber(registerDto.phoneNumber);
 
-        // Normalize phone
-        const normalizedPhone = this.otpService.normalizePhoneNumber(registerDto.phoneNumber);
-
-        // Create new user with customer role
-        const user = await this.usersService.create({
-            ...registerDto,
-            phoneNumber: normalizedPhone,
-            role: UserRole.CUSTOMER,
-            isActive: true,
-        });
-
-        const selectedBranchId = await this.branchesService.findById(registerDto.branchId);
-        // Generate tokens
-        const payload: JwtPayload = {
-            sub: user._id.toString(),
-            phoneNumber: user.phoneNumber,
-            role: user.role,
-            branchId: user.branchId?.toString(),
-            selectedBranchId: user.branchId?.toString(),
-            selectedBranchObject: selectedBranchId,
-        };
-
-        // Send OTP after successful registration
-        const otp = this.otpService.generateOtp();
-        await this.otpService.sendOtp(normalizedPhone, otp);
-
-        return {
-            success: true,
-            message: 'تم إنشاء الحساب بنجاح، تم إرسال رمز التحقق إلى رقم الهاتف',
-            data: {
-                user: {
-                    _id: user._id.toString(),
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    fullName: user.fullName,
-                    phoneNumber: user.phoneNumber,
-                    role: user.role,
-                }
-            }
-        } as any;
+    if (!registerDto.registrationToken) {
+      throw new UnauthorizedException('يلزم رمز التحقق لإتمام التسجيل');
     }
+    this.assertRegistrationToken(registerDto.registrationToken, normalizedPhone);
+
+    // (اختياري) تأكد أن الهاتف غير مستخدم مسبقًا
+    const existing = await this.usersService.findByPhoneNumber(normalizedPhone);
+    if (existing) {
+      throw new ConflictException('رقم الهاتف مستخدم مسبقًا');
+    }
+
+    // إنشاء المستخدم (بدون إرسال OTP هنا)
+    const user = await this.usersService.create({
+      ...registerDto,
+      phoneNumber: normalizedPhone,
+      role: UserRole.CUSTOMER,
+      isActive: true,
+    });
+
+    const defaultBranch = await this.branchesService.getDefaultBranch();
+    if (!defaultBranch) {
+      throw new NotFoundException('الفرع الرئيسي غير موجود');
+    }
+
+    const payload: JwtPayload = {
+      sub: user._id.toString(),
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      branchId: user.branchId?.toString(),
+      selectedBranchId: defaultBranch?._id.toString(),
+      selectedBranchObject: defaultBranch,
+    };
+
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN'),
+    });
+
+    return {
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      user: {
+        _id: user._id.toString(),
+        firstName: user.firstName,
+        lastName: user.lastName,
+        fullName: user.fullName,
+        phoneNumber: user.phoneNumber,
+        selectedBranchObject: defaultBranch,
+        role: user.role,
+        branchId: user.branchId?.toString(),
+        selectedBranchId: defaultBranch?._id.toString(),
+      },
+    };
+  }
 
     // Refresh access token
     async refreshToken(refreshTokenDto: RefreshTokenDto) {
@@ -340,4 +391,19 @@ export class AuthService {
         await this.usersService.setPasswordById(user._id.toString(), dto.newPassword);
         return { success: true, message: 'تم إعادة تعيين كلمة المرور بنجاح' };
     }
+
+      async verifyResetOtp(verifyOtpDto: VerifyOtpDto) {
+    const { phoneNumber, otp } = verifyOtpDto;
+    const normalizedPhone = this.otpService.normalizePhoneNumber(phoneNumber);
+
+    const ok = this.otpService.checkOtp(normalizedPhone, otp); // non-consuming check
+    if (!ok) {
+      throw new UnauthorizedException('رمز التحقق غير صحيح أو منتهي الصلاحية');
+    }
+    return { success: true, message: 'OTP صالح' };
+  }
+
+
+
+  
 }

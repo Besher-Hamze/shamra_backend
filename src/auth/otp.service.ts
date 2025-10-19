@@ -73,19 +73,34 @@ export class OtpService {
         return Math.floor(1000 + Math.random() * 9000).toString();
     }
 
-    verifyOtp(phoneNumber: string, otp: string): boolean {
-        const record = this.phoneToOtp.get(phoneNumber);
-        if (!record) return false;
-        if (Date.now() > record.expiresAt) {
-            this.phoneToOtp.delete(phoneNumber);
-            return false;
-        }
-        const isValid = record.otp === otp;
-        if (isValid) {
-            this.phoneToOtp.delete(phoneNumber);
-        }
-        return isValid;
+    
+
+     checkOtp(phoneNumber: string, otp: string): boolean {
+    const record = this.phoneToOtp.get(phoneNumber);
+    if (!record) return false;
+
+    if (Date.now() > record.expiresAt) {
+      this.phoneToOtp.delete(phoneNumber);
+      return false;
     }
+    // DO NOT delete the record here (no consumption)
+    return record.otp === otp;
+  }
+
+  verifyOtp(phoneNumber: string, otp: string): boolean {
+    const record = this.phoneToOtp.get(phoneNumber);
+    if (!record) return false;
+    if (Date.now() > record.expiresAt) {
+      this.phoneToOtp.delete(phoneNumber);
+      return false;
+    }
+    const isValid = record.otp === otp;
+    if (isValid) {
+      // Consumes the OTP (delete on success)
+      this.phoneToOtp.delete(phoneNumber);
+    }
+    return isValid;
+  }
 
     validatePhoneNumber(phoneNumber: string): boolean {
         // Basic phone number validation for Syrian numbers

@@ -127,4 +127,28 @@ export class AuthController {
             data: result,
         };
     }
+
+     // ✅ Verify OTP for password reset flow (no consumption)
+  @Post('reset-password/verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyResetOtp(@Body() dto: VerifyOtpDto) {
+    const result = await this.authService.verifyResetOtp(dto);
+    return {
+      success: true,
+      message: result.message,
+      data: result,
+    };
+  }
+
+   // NEW: verify OTP for REGISTER flow (returns registration_token)
+  @Post('register/verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyRegisterOtp(@Body() dto: VerifyOtpDto) {
+    const result = await this.authService.verifyOtpPreRegister(dto);
+    return {
+      success: true,
+      message: 'تم التحقق من الرمز بنجاح',
+      data: result, // { registrationToken }
+    };
+  }
 }

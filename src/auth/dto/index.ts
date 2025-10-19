@@ -1,19 +1,19 @@
-import { IsEmail, IsOptional, IsString, MinLength, IsPhoneNumber, Matches } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, IsPhoneNumber, Matches,ValidateIf } from 'class-validator';
 
 // Login DTO (phone + password)
 export class LoginDto {
-    @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
-    phoneNumber: string;
-
-    @IsString()
-    @MinLength(6)
-    password: string;
-
-    @IsOptional()
-    @IsString()
-    fcmToken?: string
-}
+     @IsString() 
+     @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+      phoneNumber: string; 
+      
+      @IsString() 
+      @MinLength(6) 
+      password: string;
+      
+      @IsOptional()
+       @IsString() 
+       fcmToken?: string 
+    }
 
 // Send OTP DTO
 export class SendOtpDto {
@@ -84,6 +84,10 @@ export class RegisterDto {
     @IsOptional()
     @IsString()
     branchId?: string
+
+    @IsOptional()
+    @IsString()
+    registrationToken?: string;
 }
 
 // Refresh Token DTO
