@@ -130,7 +130,7 @@ export class OrdersService {
         }
 
         await this.userModel.findByIdAndUpdate(userId, updateData).exec();
-        this.notificationService.notifyUserOrderEvent(userId, savedOrder.status, savedOrder._id.toString(), savedOrder.orderNumber);
+        await this.notificationService.notifyUserOrderEvent(userId, savedOrder.status, savedOrder._id.toString(), savedOrder.orderNumber);
         return await this.orderModel.findById(savedOrder._id.toString()).lean().exec();
     }
 
@@ -246,7 +246,7 @@ export class OrdersService {
             .populate('branch', 'name code')
             .exec();
 
-        this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString(), updatedOrder.orderNumber);
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString(), updatedOrder.orderNumber);
 
         return updatedOrder;
     }
@@ -300,7 +300,7 @@ export class OrdersService {
             .populate('branch', 'name code')
             .exec();
 
-        this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString(), updatedOrder.orderNumber);
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), updatedOrder.status, updatedOrder._id.toString(), updatedOrder.orderNumber);
         return updatedOrder;
     }
 
@@ -345,7 +345,7 @@ export class OrdersService {
                 updatedBy: userId,
             })
             .exec();
-        this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), OrderStatus.CANCELLED, updatedOrder._id.toString(), updatedOrder.orderNumber);
+        await this.notificationService.notifyUserOrderEvent(updatedOrder.userId.toString(), OrderStatus.CANCELLED, updatedOrder._id.toString(), updatedOrder.orderNumber);
     }
 
     // Get recent orders
