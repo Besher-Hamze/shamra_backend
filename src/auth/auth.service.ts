@@ -61,13 +61,14 @@ export class AuthService {
         if (!defaultBranch) {
             throw new NotFoundException('الفرع الرئيسي غير موجود');
         }
+        const selectedBranch = await this.branchesService.findById(user.branchId?.toString());
         const payload: JwtPayload = {
             sub: user._id.toString(),
             phoneNumber: user.phoneNumber,
             role: user.role,
             branchId: user.branchId?.toString(),
-            selectedBranchId: defaultBranch?._id.toString(),
-            selectedBranchObject: defaultBranch,
+            selectedBranchId: user.branchId?.toString(),
+            selectedBranchObject: selectedBranch,
         };
 
         const accessToken = this.jwtService.sign(payload);
@@ -88,7 +89,7 @@ export class AuthService {
                 selectedBranchObject: defaultBranch,
                 role: user.role,
                 branchId: user.branchId?.toString(),
-                selectedBranchId: defaultBranch?._id.toString(),
+                selectedBranchId: user.branchId?.toString(),
             },
         };
     }
