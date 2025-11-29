@@ -93,6 +93,10 @@ export class UpdateUserDto {
     @IsOptional()
     @IsString()
     fcmToken?: string;
+
+    @IsOptional()
+    @IsEnum(UserRole)
+    role?: UserRole;
 }
 
 // Change Password DTO

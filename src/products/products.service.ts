@@ -179,7 +179,7 @@ export class ProductsService {
             if (branchId) {
                 filter.branches = { $in: [branchId] };
             }
-            if (selectedBranchId && userRole != UserRole.ADMIN) {
+            if (selectedBranchId && (userRole != UserRole.ADMIN && userRole != UserRole.MANAGER && userRole != UserRole.EMPLOYEE)) {
                 filter.branches = { $in: [selectedBranchId] };
             }
             if (isOnSale !== undefined) {

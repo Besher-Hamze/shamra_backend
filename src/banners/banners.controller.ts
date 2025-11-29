@@ -33,7 +33,7 @@ export class BannersController {
 
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     @SingleFileUpload('image', { destination: 'uploads/banners' })
     async create(
         @Body() createBannerDto: CreateBannerFormDataDto,
@@ -92,7 +92,7 @@ export class BannersController {
 
     @Get('stats')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     async getStats() {
         const stats = await this.bannersService.getBannerStats();
         return {
@@ -114,7 +114,7 @@ export class BannersController {
 
     @Patch(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     @SingleFileUpload('image', { destination: 'uploads/banners' })
     async update(
         @Param('id') id: string,
@@ -153,7 +153,7 @@ export class BannersController {
 
     @Patch(':id/toggle-active')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     @HttpCode(HttpStatus.OK)
     async toggleActive(@Param('id') id: string, @Request() req) {
         const banner = await this.bannersService.toggleActive(id, req.user.userId);
@@ -166,7 +166,7 @@ export class BannersController {
 
     @Patch(':id/sort-order')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     @HttpCode(HttpStatus.OK)
     async updateSortOrder(
         @Param('id') id: string,
@@ -188,7 +188,7 @@ export class BannersController {
 
     @Delete(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN)
     @HttpCode(HttpStatus.OK)
     async remove(@Param('id') id: string, @Request() req) {
         await this.bannersService.remove(id, req.user.userId);

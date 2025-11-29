@@ -22,6 +22,7 @@ import {
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { Roles } from 'src/auth/decorators/role.decorator';
 import { UserRole } from 'src/common/enums';
+import { User } from 'src/users/scheme/user.scheme';
 
 @Controller('branches')
 export class BranchesController {
@@ -47,7 +48,7 @@ export class BranchesController {
 
     @Get()
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async findAll(@Query() query: BranchQueryDto) {
         const result = await this.branchesService.findAll(query);
         return {

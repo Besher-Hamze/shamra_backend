@@ -31,6 +31,7 @@ import { parseJsonField } from 'src/common/helpers';
 import { JwtAuthGuard, RolesGuard } from 'src/auth/gurads';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 import { Types } from 'mongoose';
+import { User } from 'src/users/scheme/user.scheme';
 
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -47,7 +48,7 @@ export class ProductsController {
 
     @Post()
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async create(
         @Body() createProductDto: CreateProductDto,
         @Request() req,
@@ -65,7 +66,7 @@ export class ProductsController {
 
     @Post('with-images')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     @ProductImagesUpload()
     async createWithImages(
         @Body() createProductDto: CreateProductFormDataDto,
@@ -204,7 +205,7 @@ export class ProductsController {
 
     @Patch(':id')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async update(
         @Param('id') id: string,
         @Body() updateProductDto: UpdateProductDto,
@@ -224,7 +225,7 @@ export class ProductsController {
 
     @Patch(':id/with-images')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     @ProductImagesUpload()
     async updateWithImages(
         @Param('id') id: string,
@@ -319,7 +320,7 @@ export class ProductsController {
 
     @Patch(':id/price')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async updatePrice(
         @Param('id') id: string,
         @Body() updatePriceDto: UpdatePriceDto,
@@ -339,7 +340,7 @@ export class ProductsController {
 
     @Patch(':id/toggle-active')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async toggleActive(@Param('id') id: string, @Request() req) {
         const product = await this.productsService.toggleActive(id, req.user.sub);
         return {
@@ -351,7 +352,7 @@ export class ProductsController {
 
     @Patch(':id/toggle-featured')
     @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(UserRole.ADMIN, UserRole.MANAGER)
+    @Roles(UserRole.ADMIN, UserRole.MANAGER,UserRole.EMPLOYEE)
     async toggleFeatured(@Param('id') id: string, @Request() req) {
         const product = await this.productsService.toggleFeatured(id, req.user.sub);
         return {

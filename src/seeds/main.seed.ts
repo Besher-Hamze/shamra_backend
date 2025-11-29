@@ -16,7 +16,7 @@ export class MainSeedService implements OnModuleInit {
     ) { }
 
     async onModuleInit() {
-        // await this.seedAll();
+        await this.seedAll();
     }
 
     async seedAll() {
