@@ -27,8 +27,8 @@ export class SubCategoriesController {
     @Post()
     @Roles(UserRole.ADMIN, UserRole.MANAGER)
     @SubCategoryImagesUpload()
-    create(@Body() createSubCategoryDto: CreateSubCategoryDto, @UploadedFiles() files: { image?: Express.Multer.File[] }) {
-        if (files.image && files.image[0]) {
+    create(@Body() createSubCategoryDto: CreateSubCategoryDto, @UploadedFiles() files?: { image?: Express.Multer.File[] }) {
+        if (files && files.image && files.image[0]) {
             createSubCategoryDto.image = `/uploads/sub-categories/${files.image[0].filename}`;
         }
         return this.subCategoriesService.create(createSubCategoryDto);
@@ -52,8 +52,8 @@ export class SubCategoriesController {
 
     @Patch(':id')
     @SubCategoryImagesUpload()
-    update(@Param('id') id: string, @Body() updateSubCategoryDto: UpdateSubCategoryDto, @UploadedFiles() files: { image?: Express.Multer.File[] }) {
-        if (files.image && files.image[0]) {
+    update(@Param('id') id: string, @Body() updateSubCategoryDto: UpdateSubCategoryDto, @UploadedFiles() files?: { image?: Express.Multer.File[] }) {
+        if (files && files.image && files.image[0]) {
             updateSubCategoryDto.image = `/uploads/sub-categories/${files.image[0].filename}`;
         }
 
