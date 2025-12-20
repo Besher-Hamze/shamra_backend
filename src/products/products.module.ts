@@ -5,6 +5,7 @@ import { ProductsController } from './products.controller';
 import { Product, ProductSchema } from './scheme/product.schem';
 import { Category, CategorySchema } from 'src/categories/scheme/category.scheme';
 import { SubCategory, SubCategorySchema } from 'src/sub-categories/scheme/sub-category.scheme';
+import { SubSubCategory, SubSubCategorySchema } from 'src/sub-sub-categories/scheme/sub-sub-category.scheme';
 import { Branch, BranchSchema } from 'src/branches/scheme/branche.scheme';
 import { FilesService } from 'src/files/files.service';
 import { User, UserSchema } from 'src/users/scheme/user.scheme';
@@ -15,6 +16,7 @@ import { User, UserSchema } from 'src/users/scheme/user.scheme';
       { name: Product.name, schema: ProductSchema },
       { name: Category.name, schema: CategorySchema },
       { name: SubCategory.name, schema: SubCategorySchema },
+      { name: SubSubCategory.name, schema: SubSubCategorySchema },
       { name: Branch.name, schema: BranchSchema },
       { name: User.name, schema: UserSchema },
     ]),

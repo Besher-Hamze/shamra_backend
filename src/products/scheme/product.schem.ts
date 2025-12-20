@@ -3,6 +3,7 @@ import mongoose, { Document, Types } from 'mongoose';
 import { ProductStatus } from 'src/common/enums';
 import { Category } from 'src/categories/scheme/category.scheme';
 import { SubCategory } from 'src/sub-categories/scheme/sub-category.scheme';
+import { SubSubCategory } from 'src/sub-sub-categories/scheme/sub-sub-category.scheme';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 
 // Branch pricing schema for individual branch pricing
@@ -80,6 +81,9 @@ export class Product {
     @Prop({ type: Types.ObjectId, ref: 'SubCategory', required: true })
     subCategoryId: Types.ObjectId;
 
+    @Prop({ type: Types.ObjectId, ref: 'SubSubCategory' })
+    subSubCategoryId: Types.ObjectId;
+
     @Prop({ type: [String], default: [] })
     images: string[];
 
@@ -136,6 +140,7 @@ export class Product {
     // Virtual fields (populated data)
     category?: Category;
     subCategory?: SubCategory;
+    subSubCategory?: SubSubCategory;
     branchDetails: Branch[];
 }
 
@@ -146,6 +151,7 @@ ProductSchema.index({ name: 1 });
 ProductSchema.index({ barcode: 1 });
 ProductSchema.index({ categoryId: 1 });
 ProductSchema.index({ subCategoryId: 1 });
+ProductSchema.index({ subSubCategoryId: 1 });
 ProductSchema.index({ brand: 1 });
 ProductSchema.index({ status: 1 });
 ProductSchema.index({ isActive: 1 });
@@ -170,6 +176,7 @@ ProductSchema.index({ price: 1, categoryId: 1, subCategoryId: 1 });
 ProductSchema.index({ brand: 1, categoryId: 1, subCategoryId: 1 });
 ProductSchema.index({ 'branchPricing.branchId': 1, 'branchPricing.isActive': 1 });
 ProductSchema.index({ 'branchPricing.branchId': 1, categoryId: 1, subCategoryId: 1 });
+ProductSchema.index({ categoryId: 1, subCategoryId: 1, subSubCategoryId: 1 });
 
 // Text index for search
 ProductSchema.index({
@@ -300,6 +307,14 @@ ProductSchema.virtual('category', {
 ProductSchema.virtual('subCategory', {
     ref: 'SubCategory',
     localField: 'subCategoryId',
+    foreignField: '_id',
+    justOne: true
+});
+
+// Virtual for populated sub subcategory
+ProductSchema.virtual('subSubCategory', {
+    ref: 'SubSubCategory',
+    localField: 'subSubCategoryId',
     foreignField: '_id',
     justOne: true
 });

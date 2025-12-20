@@ -17,6 +17,7 @@ import { ReportsModule } from './reports/reports.module';
 import { SeedsModule } from './seeds/seeds.module';
 import { SettingsModule } from './settings/settings.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
+import { SubSubCategoriesModule } from './sub-sub-categories/sub-sub-categories.module';
 import { BannersModule } from './banners/banners.module';
 import { MerchantsModule } from './merchants/merchants.module';
 
@@ -44,6 +45,7 @@ import { MerchantsModule } from './merchants/merchants.module';
     ReportsModule,
     SettingsModule,
     SubCategoriesModule,
+    SubSubCategoriesModule,
     BannersModule,
     MerchantsModule,
     SeedsModule,

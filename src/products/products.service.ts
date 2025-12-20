@@ -18,6 +18,7 @@ import {
 import { Product, ProductDocument } from './scheme/product.schem';
 import { Category, CategoryDocument } from 'src/categories/scheme/category.scheme';
 import { SubCategory, SubCategoryDocument } from 'src/sub-categories/scheme/sub-category.scheme';
+import { SubSubCategory, SubSubCategoryDocument } from 'src/sub-sub-categories/scheme/sub-sub-category.scheme';
 import { Branch, BranchDocument } from 'src/branches/scheme/branche.scheme';
 import { SubCategoryType, UserRole } from 'src/common/enums';
 import { User, UserDocument } from 'src/users/scheme/user.scheme';
@@ -30,6 +31,7 @@ export class ProductsService {
         @InjectModel(Product.name) private productModel: Model<ProductDocument>,
         @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
         @InjectModel(SubCategory.name) private subCategoryModel: Model<SubCategoryDocument>,
+        @InjectModel(SubSubCategory.name) private subSubCategoryModel: Model<SubSubCategoryDocument>,
         @InjectModel(Branch.name) private branchModel: Model<BranchDocument>,
         @InjectModel(User.name) private userModel: Model<UserDocument>,
     ) { }
@@ -38,7 +40,7 @@ export class ProductsService {
     async create(createProductDto: CreateProductDto, userId: string): Promise<Product> {
         try {
             this.logger.log(`Creating product: ${createProductDto.name}`);
-            const { categoryId, subCategoryId, branches } = createProductDto;
+            const { categoryId, subCategoryId, subSubCategoryId, branches } = createProductDto;
 
             // Validate category
             const category = await this.categoryModel.findById(categoryId).exec();
@@ -71,6 +73,21 @@ export class ProductsService {
                 } else if (subCategory.type === SubCategoryType.FREE_ATTR) {
                     // For free attributes, set specifications to empty object
                     createProductDto.specifications = {};
+                }
+            }
+
+            // Validate sub-subcategory if provided
+            if (subSubCategoryId) {
+                if (!subCategoryId) {
+                    throw new BadRequestException('SubSubCategory requires a SubCategory to be specified');
+                }
+                const subSubCategory = await this.subSubCategoryModel.findById(subSubCategoryId).exec();
+                if (!subSubCategory || subSubCategory.isDeleted || !subSubCategory.isActive) {
+                    throw new NotFoundException('SubSubCategory not found or inactive');
+                }
+                // Ensure sub-subcategory belongs to the specified subcategory
+                if (subSubCategory.subCategoryId.toString() !== subCategoryId) {
+                    throw new BadRequestException('SubSubCategory does not belong to the specified SubCategory');
                 }
             }
 
@@ -120,6 +137,7 @@ export class ProductsService {
                 sort = '-createdAt',
                 categoryId,
                 subCategoryId,
+                subSubCategoryId,
                 brand,
                 status,
                 isActive,
@@ -139,6 +157,7 @@ export class ProductsService {
 
             if (categoryId) filter.categoryId = categoryId;
             if (subCategoryId) filter.subCategoryId = subCategoryId;
+            if (subSubCategoryId) filter.subSubCategoryId = subSubCategoryId;
             if (brand) filter.brand = { $regex: brand, $options: 'i' };
             if (status) filter.status = status;
             if (isActive !== undefined) filter.isActive = isActive;
@@ -217,6 +236,7 @@ export class ProductsService {
                 .limit(limit)
                 .populate('category', 'name  image isActive')
                 .populate('subCategory', 'name categoryId type customFields isActive')
+                .populate('subSubCategory', 'name image subCategoryId isActive')
                 .exec();
 
             this.logger.log(`Found ${products.length} products out of ${total} total`);
@@ -246,6 +266,7 @@ export class ProductsService {
                 .findById(id)
                 .populate('category', 'name  description  image isActive isFeatured')
                 .populate('subCategory', 'name categoryId type customFields isActive')
+                .populate('subSubCategory', 'name image subCategoryId isActive')
                 .populate('branchDetails')
                 .exec();
 
@@ -491,6 +512,7 @@ export class ProductsService {
                 .sort({ sortOrder: 1, createdAt: -1 })
                 .populate('category', 'name  image isActive')
                 .populate('subCategory', 'name type customFields isActive')
+                .populate('subSubCategory', 'name image subCategoryId isActive')
                 .exec();
 
             this.logger.log(`Found ${products.length} featured products`);
@@ -528,6 +550,7 @@ export class ProductsService {
                 .sort({ createdAt: -1 })
                 .populate('category', 'name  image isActive')
                 .populate('subCategory', 'name type customFields isActive')
+                .populate('subSubCategory', 'name image subCategoryId isActive')
                 .exec();
 
             this.logger.log(`Found ${products.length} products on sale`);

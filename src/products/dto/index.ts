@@ -60,7 +60,9 @@ export class CreateProductDto {
     @IsMongoId()
     subCategoryId?: string;
 
-
+    @IsOptional()
+    @IsMongoId()
+    subSubCategoryId?: string;
 
     @IsOptional()
     @IsArray()
@@ -132,6 +134,10 @@ export class CreateProductFormDataDto {
     @IsOptional()
     @IsString()
     subCategoryId: string;
+
+    @IsOptional()
+    @IsString()
+    subSubCategoryId?: string;
 
     @IsOptional()
     branches?: string;
@@ -210,6 +216,10 @@ export class ProductQueryDto {
     @IsOptional()
     @IsMongoId()
     subCategoryId?: string;
+
+    @IsOptional()
+    @IsMongoId()
+    subSubCategoryId?: string;
 
     @IsOptional()
     @IsString()

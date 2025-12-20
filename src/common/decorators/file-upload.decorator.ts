@@ -143,6 +143,22 @@ export function SubCategoryImagesUpload(options: FileUploadOptions = {}) {
         { name: 'image', maxCount: 1 }
     ], config);
 }
+
+/**
+ * Decorator for sub sub category images
+ * @param options - Upload configuration options
+ */
+export function SubSubCategoryImagesUpload(options: FileUploadOptions = {}) {
+    const config = {
+        ...defaultOptions,
+        destination: 'uploads/sub-sub-categories',
+        ...options
+    };
+
+    return FileFieldsUpload([
+        { name: 'image', maxCount: 1 }
+    ], config);
+}
 /**
  * Decorator for user avatar upload
  * @param options - Upload configuration options
