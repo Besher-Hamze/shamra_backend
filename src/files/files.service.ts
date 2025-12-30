@@ -11,7 +11,8 @@ export class FilesService {
         'image/jpg',
         'image/png',
         'image/gif',
-        'image/webp'
+        'image/webp',
+        'image/heic',
     ];
     private readonly maxFileSize = 5 * 1024 * 1024; // 5MB
 
