@@ -5,7 +5,7 @@ import axios from 'axios';
 @Injectable()
 export class OtpService {
     private readonly otpApiUrl = 'https://otp.anycode-sy.com/api/auth/send-otp';
-    private readonly apiKey = 'b13e211b-9905-4715-9522-a2f257c7c358';
+    private readonly apiKey = '22debf46-9a86-4bdb-89ce-03d32e49e97d';
     private readonly phoneToOtp: Map<string, { otp: string; expiresAt: number }> = new Map();
     private readonly ttlMs = 5 * 60 * 1000; // 5 minutes
 
