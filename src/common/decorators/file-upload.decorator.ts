@@ -24,7 +24,8 @@ const defaultOptions: Required<FileUploadOptions> = {
         'image/jpg',
         'image/png',
         'image/gif',
-        'image/webp'
+        'image/webp',
+        'image/heic',
     ],
     maxFiles: 10
 };
