@@ -248,6 +248,7 @@ export class ProductsController {
         if (updateProductDto.barcode !== undefined) productData.barcode = updateProductDto.barcode;
         if (updateProductDto.categoryId) productData.categoryId = updateProductDto.categoryId;
         if (updateProductDto.subCategoryId) productData.subCategoryId = updateProductDto.subCategoryId;
+        if (updateProductDto.subSubCategoryId) productData.subSubCategoryId = updateProductDto.subSubCategoryId;
         if (updateProductDto.branches) {
             productData.branches = parseJsonField(updateProductDto.branches, []);
         }
