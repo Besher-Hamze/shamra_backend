@@ -103,6 +103,7 @@ export class ProductsController {
             barcode: createProductDto.barcode,
             categoryId: createProductDto.categoryId,
             subCategoryId: createProductDto.subCategoryId,
+            subSubCategoryId: createProductDto.subSubCategoryId,
             branchPricing: transformedBranchPricing,
             branches: parseJsonField(createProductDto.branches, []),
             brand: createProductDto.brand,
