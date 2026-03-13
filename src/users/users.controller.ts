@@ -137,6 +137,16 @@ export class UsersController {
         };
     }
 
+    @Delete('profile/delete')
+    @HttpCode(HttpStatus.OK)
+    async deleteProfile(@Request() req) {
+        await this.usersService.remove(req.user.sub);
+        return {
+            success: true,
+            message: 'تم حذف الحساب بنجاح',
+        };
+    }
+
     @Patch(':id')
     @UseGuards(RolesGuard)
     @Roles(UserRole.ADMIN, UserRole.MANAGER)

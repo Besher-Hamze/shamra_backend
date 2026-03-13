@@ -209,8 +209,20 @@ export class UsersService {
             throw new NotFoundException('User not found');
         }
 
+        const suffix = `_deleted_${Date.now()}`;
+        const updateData: any = {
+            isDeleted: true,
+            isActive: false,
+            fcmToken: null,
+            phoneNumber: `${user.phoneNumber}${suffix}`,
+        };
+
+        if (user.email) {
+            updateData.email = `${user.email}${suffix}`;
+        }
+
         await this.userModel
-            .findByIdAndUpdate(id, { isDeleted: true, isActive: false })
+            .findByIdAndUpdate(id, updateData)
             .exec();
     }
 
