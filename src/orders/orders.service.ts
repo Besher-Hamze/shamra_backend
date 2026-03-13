@@ -48,11 +48,11 @@ export class OrdersService {
                 throw new NotFoundException(`Product ${item.productName} not found or inactive`);
             }
 
-            if (product.getBranchStockQuantity(branchId) < item.quantity) {
-                throw new BadRequestException(
-                    `Insufficient stock for ${product.name}. Available: ${product.getBranchStockQuantity(branchId)}, Requested: ${item.quantity}`
-                );
-            }
+            // if (product.getBranchStockQuantity(branchId) < item.quantity) {
+            //     throw new BadRequestException(
+            //         `Insufficient stock for ${product.name}. Available: ${product.getBranchStockQuantity(branchId)}, Requested: ${item.quantity}`
+            //     );
+            // }
 
             const total = item.quantity * item.price;
             orderItems.push({ ...item, total, categoryId: product.categoryId });
