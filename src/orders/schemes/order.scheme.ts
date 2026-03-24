@@ -42,7 +42,7 @@ export class Order {
     @Prop({ type: Types.ObjectId, ref: 'Branch' })
     branchId: Types.ObjectId;
 
-    @Prop({ type: [OrderItemSchema], required: true })
+    @Prop({ type: [OrderItemSchema], required: true, default: [] })
     items: OrderItem[];
 
     @Prop({ required: true, min: 0 })
@@ -128,7 +128,8 @@ OrderSchema.virtual('user', {
 })
 // Virtual for total quantity
 OrderSchema.virtual('totalQuantity').get(function () {
-    return this.items.reduce((sum, item) => sum + item.quantity, 0);
+    const items = Array.isArray(this.items) ? this.items : [];
+    return items.reduce((sum, item) => sum + item.quantity, 0);
 });
 
 // Pre-save middleware
@@ -140,8 +141,9 @@ OrderSchema.pre('save', function (next) {
     }
 
     // Calculate totals
-    this.subtotal = this.items.reduce((sum, item) => sum + item.total, 0);
-    this.totalAmount = this.subtotal + this.taxAmount - this.discountAmount;
+    const items = Array.isArray(this.items) ? this.items : [];
+    this.subtotal = items.reduce((sum, item) => sum + item.total, 0);
+    this.totalAmount = this.subtotal + (this.taxAmount ?? 0) - (this.discountAmount ?? 0);
 
     next();
 });
