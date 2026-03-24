@@ -13,16 +13,21 @@ import { MarkReadDto } from './dto/mark-read.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 
 import * as admin from 'firebase-admin';
+import { resolve } from 'path';
 import { UsersService } from 'src/users/users.service';
 import { User, UserDocument } from 'src/users/scheme/user.scheme';
 import { OrderStatus } from 'src/common/enums';
 
-// ✅ Initialize Firebase Admin once
-admin.initializeApp({
-  credential: admin.credential.cert(
-    require('../../firebase-service-account.json'), // تأكد أن المسار صحيح
-  ),
-});
+const serviceAccountPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH
+  ? resolve(process.env.FIREBASE_SERVICE_ACCOUNT_PATH)
+  : resolve(process.cwd(), 'firebase-service-account.json');
+
+// Initialize Firebase Admin once using a runtime-safe absolute path.
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(require(serviceAccountPath)),
+  });
+}
 
 @Injectable()
 export class NotificationsService {
