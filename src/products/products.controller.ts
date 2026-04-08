@@ -34,7 +34,6 @@ import { Types } from 'mongoose';
 import { User } from 'src/users/scheme/user.scheme';
 
 @Controller('products')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductsController {
     constructor(
         private readonly productsService: ProductsService,
@@ -141,6 +140,16 @@ export class ProductsController {
         };
     }
 
+    @Get("guest")
+    async findAllGuest(@Query() query: ProductQueryDto) {
+        const result = await this.productsService.findAllGuest(query);
+        return {
+            success: true,
+            message: 'تم جلب المنتجات بنجاح',
+            data: result.data,
+            pagination: result.pagination,
+        };
+    }
     @Get('featured')
     async getFeatured(@Query('limit') limit?: string, @GetSelectedBranchId() branchId?: string) {
         const products = await this.productsService.getFeatured(

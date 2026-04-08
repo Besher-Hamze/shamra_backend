@@ -257,6 +257,102 @@ export class ProductsService {
         }
     }
 
+    async findAllGuest(query: ProductQueryDto) {
+        try {
+            const {
+                page = 1,
+                limit = 20,
+                sort = '-createdAt',
+                categoryId,
+                subCategoryId,
+                subSubCategoryId,
+                brand,
+                status,
+                isActive,
+                isFeatured,
+                isOnSale,
+                minPrice,
+                maxPrice,
+                search,
+                tags,
+                branchId,
+                selectedBranchId,
+            } = query;
+
+            // Build filter
+            const filter: any = { isDeleted: { $ne: true } };
+
+            if (categoryId) filter.categoryId = categoryId;
+            if (subCategoryId) filter.subCategoryId = subCategoryId;
+            if (subSubCategoryId) filter.subSubCategoryId = subSubCategoryId;
+            if (brand) filter.brand = { $regex: brand, $options: 'i' };
+            if (status) filter.status = status;
+            if (isActive !== undefined) filter.isActive = isActive;
+            if (isFeatured !== undefined) filter.isFeatured = isFeatured;
+
+            // Price range filter
+            if (minPrice !== undefined || maxPrice !== undefined) {
+                filter.price = { $gte: minPrice, $lte: maxPrice };
+            }
+
+            // Tags filter
+            if (tags && tags.length > 0) {
+                filter.tags = { $in: tags };
+            }
+
+            // Branch filter
+            if (branchId) {
+                filter.branches = { $in: [branchId] };
+            }
+            if (selectedBranchId) {
+                filter.branches = { $in: [selectedBranchId] };
+            }
+            if (isOnSale !== undefined) {
+                filter['branchPricing.isOnSale'] = isOnSale;
+            }
+
+            // Search filter
+            if (search) {
+                filter.$or = [
+                    { name: { $regex: search, $options: 'i' } },
+                    { brand: { $regex: search, $options: 'i' } },
+                    { tags: { $in: [new RegExp(search, 'i')] } },
+                ];
+            }
+
+            // Calculate pagination
+            const skip = (page - 1) * limit;
+            const total = await this.productModel.countDocuments(filter).exec();
+            const pages = Math.ceil(total / limit);
+
+            // Get products
+            const products = await this.productModel
+                .find(filter)
+                .sort(sort)
+                .skip(skip)
+                .limit(limit)
+                .populate('category', 'name  image isActive')
+                .populate('subCategory', 'name categoryId type customFields isActive')
+                .populate('subSubCategory', 'name image subCategoryId isActive')
+                .exec();
+
+            this.logger.log(`Found ${products.length} products out of ${total} total`);
+            return {
+                data: products,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    pages,
+                    hasNext: page < pages,
+                    hasPrev: page > 1,
+                },
+            };
+        } catch (error) {
+            this.logger.error(`Error finding products: ${error.message}`, error.stack);
+            throw new InternalServerErrorException('Failed to retrieve products');
+        }
+    }
     // Find product by ID
     async findById(id: string): Promise<Product> {
         try {
