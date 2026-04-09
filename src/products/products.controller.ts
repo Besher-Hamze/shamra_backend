@@ -130,6 +130,7 @@ export class ProductsController {
     }
 
     @Get()
+    @UseGuards(JwtAuthGuard, RolesGuard)
     async findAll(@Query() query: ProductQueryDto, @GetUserId() userId: string, @GetUserRole() userRole?: UserRole) {
         const result = await this.productsService.findAll(query, userId, userRole);
         return {
