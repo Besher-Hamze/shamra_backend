@@ -33,6 +33,7 @@ export const GetSelectedBranchId = createParamDecorator(
         const request = ctx.switchToHttp().getRequest<Request>();
 
         if (!request.user) {
+            return null;
             throw new UnauthorizedException('User not found');
         }
         const user = request.user as JwtPayload;
