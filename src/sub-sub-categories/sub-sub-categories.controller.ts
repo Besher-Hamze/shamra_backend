@@ -20,11 +20,11 @@ import { UserRole } from '../common/enums';
 import { SubSubCategoryImagesUpload } from 'src/common/decorators';
 
 @Controller('sub-sub-categories')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class SubSubCategoriesController {
     constructor(private readonly subSubCategoriesService: SubSubCategoriesService) { }
 
     @Post()
+    @UseGuards(JwtAuthGuard, RolesGuard)
     @Roles(UserRole.ADMIN, UserRole.MANAGER)
     @SubSubCategoryImagesUpload()
     create(@Body() createSubSubCategoryDto: CreateSubSubCategoryDto, @UploadedFiles() files?: { image?: Express.Multer.File[] }) {
