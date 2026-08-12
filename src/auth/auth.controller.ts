@@ -3,14 +3,13 @@ import {
     Post,
     Body,
     UseGuards,
-    Request,
     Get,
     HttpCode,
     HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard, LocalAuthGuard } from './gurads';
-import { LoginDto, RefreshTokenDto, RegisterDto, SendOtpDto, VerifyOtpDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
+import { JwtAuthGuard } from './gurads';
+import { LoginDto, RefreshTokenDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
 import { GetSelectedBranchObject, GetUserId } from 'src/common/decorators';
 import { Branch } from 'src/branches/scheme/branche.scheme';
 
@@ -83,29 +82,6 @@ export class AuthController {
         };
     }
 
-    @Post('send-otp')
-    @HttpCode(HttpStatus.OK)
-    async sendOtp(@Body() sendOtpDto: SendOtpDto) {
-        const result = await this.authService.sendOtp(sendOtpDto);
-        return {
-            success: true,
-            message: result.message,
-            data: result,
-        };
-    }
-
-    // Verify OTP after registration
-    @Post('verify-otp')
-    @HttpCode(HttpStatus.OK)
-    async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
-        const result = await this.authService.verifyOtpPostRegister(verifyOtpDto);
-        return {
-            success: true,
-            message: 'تم تفعيل الحساب بنجاح',
-            data: result,
-        };
-    }
-
     @Post('forgot-password')
     @HttpCode(HttpStatus.OK)
     async forgotPassword(@Body() dto: ForgotPasswordDto) {
@@ -127,28 +103,4 @@ export class AuthController {
             data: result,
         };
     }
-
-     // ✅ Verify OTP for password reset flow (no consumption)
-  @Post('reset-password/verify-otp')
-  @HttpCode(HttpStatus.OK)
-  async verifyResetOtp(@Body() dto: VerifyOtpDto) {
-    const result = await this.authService.verifyResetOtp(dto);
-    return {
-      success: true,
-      message: result.message,
-      data: result,
-    };
-  }
-
-   // NEW: verify OTP for REGISTER flow (returns registration_token)
-  @Post('register/verify-otp')
-  @HttpCode(HttpStatus.OK)
-  async verifyRegisterOtp(@Body() dto: VerifyOtpDto) {
-    const result = await this.authService.verifyOtpPreRegister(dto);
-    return {
-      success: true,
-      message: 'تم التحقق من الرمز بنجاح',
-      data: result, // { registrationToken }
-    };
-  }
 }

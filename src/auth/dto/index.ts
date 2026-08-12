@@ -1,54 +1,40 @@
-import { IsEmail, IsOptional, IsString, MinLength, IsPhoneNumber, Matches,ValidateIf } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength, MaxLength, Matches } from 'class-validator';
+
+const PHONE_INPUT_PATTERN = /^[\d+\s().-]+$/;
 
 // Login DTO (phone + password)
 export class LoginDto {
-     @IsString() 
-     @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
-      phoneNumber: string; 
-      
-      @IsString() 
-      @MinLength(6) 
-      password: string;
-      
-      @IsOptional()
-       @IsString() 
-       fcmToken?: string 
-    }
-
-// Send OTP DTO
-export class SendOtpDto {
     @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
-    phoneNumber: string;
-}
-
-// Verify OTP DTO (post-register verification)
-export class VerifyOtpDto {
-    @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    @MinLength(8, { message: 'رقم الهاتف غير صحيح' })
+    @MaxLength(24, { message: 'رقم الهاتف غير صحيح' })
+    @Matches(PHONE_INPUT_PATTERN, { message: 'رقم الهاتف غير صحيح' })
     phoneNumber: string;
 
     @IsString()
-    @MinLength(4)
-    otp: string;
+    @MinLength(6)
+    password: string;
+
+    @IsOptional()
+    @IsString()
+    fcmToken?: string;
 }
 
-// Forgot Password DTO (send OTP)
+// Forgot Password DTO
 export class ForgotPasswordDto {
     @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    @MinLength(8, { message: 'رقم الهاتف غير صحيح' })
+    @MaxLength(24, { message: 'رقم الهاتف غير صحيح' })
+    @Matches(PHONE_INPUT_PATTERN, { message: 'رقم الهاتف غير صحيح' })
     phoneNumber: string;
 }
 
-// Reset Password DTO (verify OTP + new password)
+// Reset Password DTO (phone + new password, no OTP)
 export class ResetPasswordDto {
     @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    @MinLength(8, { message: 'رقم الهاتف غير صحيح' })
+    @MaxLength(24, { message: 'رقم الهاتف غير صحيح' })
+    @Matches(PHONE_INPUT_PATTERN, { message: 'رقم الهاتف غير صحيح' })
     phoneNumber: string;
-
-    @IsString()
-    @MinLength(4)
-    otp: string;
 
     @IsString()
     @MinLength(6)
@@ -74,20 +60,18 @@ export class RegisterDto {
     password: string;
 
     @IsString()
-    @Matches(/^(\+963|0)?[0-9]{9}$/, { message: 'رقم الهاتف غير صحيح' })
+    @MinLength(8, { message: 'رقم الهاتف غير صحيح' })
+    @MaxLength(24, { message: 'رقم الهاتف غير صحيح' })
+    @Matches(PHONE_INPUT_PATTERN, { message: 'رقم الهاتف غير صحيح' })
     phoneNumber: string;
 
     @IsOptional()
     @IsString()
-    fcmToken?: string
+    fcmToken?: string;
 
     @IsOptional()
     @IsString()
-    branchId?: string
-
-    @IsOptional()
-    @IsString()
-    registrationToken?: string;
+    branchId?: string;
 }
 
 // Refresh Token DTO
